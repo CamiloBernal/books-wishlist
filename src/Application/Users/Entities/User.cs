@@ -1,4 +1,6 @@
 
+namespace BooksWishlist.Application.Users.Entities;
+
 public class User
 {
     public Guid UserId { get; set; } = Guid.NewGuid();

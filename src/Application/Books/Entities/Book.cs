@@ -1,3 +1,5 @@
+namespace BooksWishlist.Application.Books.Entities;
+
 public class Book
 {
 
