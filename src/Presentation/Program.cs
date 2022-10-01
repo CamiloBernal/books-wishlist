@@ -15,14 +15,23 @@ builder.Services.AddEndpointsApiExplorer()
     .AddWatchDogServices(opt => opt.IsAutoClear = true)
     .AddModelValidators()
     .AddHealthChecks();
+
+//Logger
+using (var loggerFactory = LoggerFactory.Create(b => b.AddConsole()))
+{
+    var logger = loggerFactory.CreateLogger<LoggerService>();
+    builder.Services.AddSingleton(typeof(ILogger), logger);
+}
+
 //IoC
-builder.Services.AddSingleton<ILoggerService, LoggerService>();
-builder.Services.AddScoped<ISecurityService, SecurityService>();
+builder.Services.AddSingleton<ILoggerService, LoggerService>()
+    .AddScoped<ISecurityService, SecurityService>();
 
 //Config services
-builder.Services.Configure<StoreDatabaseSettings>(builder.Configuration.GetSection("StoreDatabase"));
-builder.Services.Configure<CryptoServiceSettings>(builder.Configuration.GetSection("CryptoServices"));
+builder.Services.Configure<StoreDatabaseSettings>(builder.Configuration.GetSection("StoreDatabase"))
+    .Configure<CryptoServiceSettings>(builder.Configuration.GetSection("CryptoServices"));
 
+//App Config
 var app = builder.Build();
 
 
@@ -47,7 +56,7 @@ if (app.Environment.IsDevelopment())
 
 //Health check Endpoint:
 
-app.MapGet("/health", async (HealthCheckService healthCheckService, CancellationToken cancellationToken ) =>
+app.MapGet("/health", async (HealthCheckService healthCheckService, CancellationToken cancellationToken) =>
 {
     WatchLogger.Log($"Health check validation at: {DateTime.UtcNow} (UTC)");
     var report = await healthCheckService.CheckHealthAsync(cancellationToken);
