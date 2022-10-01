@@ -13,3 +13,4 @@ global using Microsoft.OpenApi.Any;
 global using Microsoft.OpenApi.Models;
 global using Swashbuckle.AspNetCore.SwaggerGen;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;
+global using WatchDog;

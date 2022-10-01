@@ -12,31 +12,38 @@ builder.Services.AddEndpointsApiExplorer()
     .AddAuthorization()
     .ConfigureAuthentication(issuer, audience, signingKey)
     .AddEndpointsApiExplorer()
-    .ConfigureOpenApi();
+    .ConfigureOpenApi()
+    .AddWatchDogServices(opt => opt.IsAutoClear = true)
+    .AddHealthChecks();
 
 
 var app = builder.Build();
 
+
+app.UseWatchDogExceptionLogger()
+    .UseHttpsRedirection()
+    .UseSwagger()
+    .UseSwaggerUI()
+    .UseHttpsRedirection()
+    .UseAuthentication()
+    .UseAuthorization()
+    .UseRouting()
+    .UseWatchDog(opt =>
+    {
+        opt.WatchPageUsername = "MELI";
+        opt.WatchPagePassword = "MeliUser1234";
+    });
 
 if (app.Environment.IsDevelopment())
 {
     _ = app.UseDeveloperExceptionPage();
 }
 
-
-app.UseHttpsRedirection()
-    .UseSwagger()
-    .UseSwaggerUI()
-    .UseHttpsRedirection()
-    .UseAuthorization()
-    .UseAuthentication()
-    .UseRouting();
-
-
 //Health check Endpoint:
 
 app.MapGet("/health", async (HealthCheckService healthCheckService) =>
 {
+    WatchLogger.Log($"Health check validation at: {DateTime.UtcNow} (UTC)");
     var report = await healthCheckService.CheckHealthAsync();
     return report.Status == HealthStatus.Healthy
         ? Results.Ok(report)
@@ -44,4 +51,5 @@ app.MapGet("/health", async (HealthCheckService healthCheckService) =>
 }).WithTags(new[] { "Health" }).Produces(200).ProducesProblem(503).ProducesProblem(401);
 
 //Run The App
+WatchLogger.Log("...Starting Host...");
 app.Run();
