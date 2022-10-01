@@ -1,20 +1,9 @@
-using BooksWishlist.Presentation.Modules;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-
-
-
-string issuer;
-string audience;
-string signingKey;
-
-issuer = builder.Configuration["Issuer"];
-audience = builder.Configuration["Audience"];
-signingKey = builder.Configuration["SigningKey"];
-
+var issuer = builder.Configuration["Issuer"];
+var audience = builder.Configuration["Audience"];
+var signingKey = builder.Configuration["SigningKey"];
 
 builder.Services.AddEndpointsApiExplorer()
     .AddSwaggerGen()
@@ -22,23 +11,35 @@ builder.Services.AddEndpointsApiExplorer()
     .AddHttpContextAccessor()
     .AddAuthorization()
     .ConfigureAuthentication(issuer, audience, signingKey)
-    .AddEndpointsApiExplorer();
+    .AddEndpointsApiExplorer()
+    .ConfigureOpenApi();
 
-//TODO: Add Open API Module
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
-    _ = app.UseSwagger()
-        .UseSwaggerUI();
+    _ = app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
+app.UseSwagger()
+    .UseSwaggerUI()
+    .UseHttpsRedirection()
+    .UseAuthorization()
+    .UseAuthentication()
+    .UseRouting();
 
-app.UseAuthorization();
 
-app.MapControllers();
+//Health check Endpoint:
 
+app.MapGet("/health", async (HealthCheckService healthCheckService) =>
+{
+    var report = await healthCheckService.CheckHealthAsync();
+    return report.Status == HealthStatus.Healthy
+        ? Results.Ok(report)
+        : Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+}).WithTags(new[] { "Health" }).Produces(200).ProducesProblem(503).ProducesProblem(401);
+
+//Run The App
 app.Run();

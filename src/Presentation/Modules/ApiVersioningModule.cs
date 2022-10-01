@@ -1,5 +1,3 @@
-using Asp.Versioning;
-
 namespace BooksWishlist.Presentation.Modules;
 
 public static class ApiVersioningModule

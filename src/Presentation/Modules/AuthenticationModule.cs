@@ -1,9 +1,5 @@
 namespace BooksWishlist.Presentation.Modules;
 
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-
 public static class AuthenticationModule
 {
     public static IServiceCollection ConfigureAuthentication(this IServiceCollection services, string issuer,

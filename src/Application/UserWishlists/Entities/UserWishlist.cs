@@ -1,10 +1,9 @@
-using BooksWishlist.Application.Books.Entities;
-
 namespace BooksWishlist.Application.UserWishlists.Entities;
+
+using Books.Entities;
 
 public class UserWishlists
 {
-
     public Guid Owner { get; set; }
 
     public string Name { get; set; }
@@ -18,5 +17,4 @@ public class UserWishlists
     public IEnumerable<string> Tags { get; set; } = new List<string>();
 
     public IEnumerable<Book> Books { get; set; } = new List<Book>();
-
 }

@@ -1,4 +1,3 @@
-
 namespace BooksWishlist.Application.Users.Entities;
 
 public class User
