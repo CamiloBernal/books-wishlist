@@ -23,7 +23,9 @@ if (app.Environment.IsDevelopment())
     _ = app.UseDeveloperExceptionPage();
 }
 
-app.UseSwagger()
+
+app.UseHttpsRedirection()
+    .UseSwagger()
     .UseSwaggerUI()
     .UseHttpsRedirection()
     .UseAuthorization()
