@@ -1,5 +1,3 @@
-using BooksWishlist.Presentation.Services;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -21,6 +19,9 @@ builder.Services.AddEndpointsApiExplorer()
 builder.Services.AddSingleton<ILoggerService, LoggerService>();
 builder.Services.AddScoped<ISecurityService, SecurityService>();
 
+//Config services
+builder.Services.Configure<StoreDatabaseSettings>(builder.Configuration.GetSection("StoreDatabase"));
+builder.Services.Configure<CryptoServiceSettings>(builder.Configuration.GetSection("CryptoServices"));
 
 var app = builder.Build();
 
@@ -46,10 +47,10 @@ if (app.Environment.IsDevelopment())
 
 //Health check Endpoint:
 
-app.MapGet("/health", async (HealthCheckService healthCheckService) =>
+app.MapGet("/health", async (HealthCheckService healthCheckService, CancellationToken cancellationToken ) =>
 {
     WatchLogger.Log($"Health check validation at: {DateTime.UtcNow} (UTC)");
-    var report = await healthCheckService.CheckHealthAsync();
+    var report = await healthCheckService.CheckHealthAsync(cancellationToken);
     return report.Status == HealthStatus.Healthy
         ? Results.Ok(report)
         : Results.StatusCode(StatusCodes.Status503ServiceUnavailable);

@@ -1,4 +1,4 @@
-﻿namespace BooksWishlist.Infrastructure.Databases;
+﻿namespace BooksWishlist.Infrastructure.Settings;
 
 public class StoreDatabaseSettings
 {
