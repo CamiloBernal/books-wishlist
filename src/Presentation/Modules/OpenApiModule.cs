@@ -1,6 +1,6 @@
-namespace BooksWishlist.Presentation.Modules;
+using BooksWishlist.Presentation.Filters;
 
-using Filters;
+namespace BooksWishlist.Presentation.Modules;
 
 public static class OpenApiModule
 {
@@ -19,7 +19,7 @@ public static class OpenApiModule
                         Name = "Camilo Bernal", Url = new Uri("https://www.camilobernal.dev")
                     }
                 });
-
+            setup.SchemaFilter<OpenApiSchemaFilter>();
             setup.AddSecurityDefinition("Bearer",
                 new OpenApiSecurityScheme
                 {

@@ -959,3 +959,5 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,windows,dotnetcore,rider,visualstudio,visualstudiocode,csharp,git,jetbrains,jetbrains+all,webstorm,backup
 
+/src/Presentation/watchlogs.db
+/src/Presentation/watchlogs-log.db

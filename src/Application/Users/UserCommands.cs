@@ -1,6 +1,6 @@
-namespace BooksWishlist.Application.Users;
+using BooksWishlist.Application.Users.Entities;
 
-using Entities;
+namespace BooksWishlist.Application.Users;
 
 public class UserCommands : IRepository<User>
 {
