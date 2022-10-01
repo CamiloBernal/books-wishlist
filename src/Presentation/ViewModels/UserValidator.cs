@@ -6,7 +6,9 @@ public class UserValidator : AbstractValidator<User>
     {
         RuleFor(u => u.UserName)
             .NotEmpty()
-            .Matches(@"^[a-zA-Z0-9]+$").WithMessage("Only letters and numbers are allowed for the username. Special characters (including space) are not valid") //Only letters and numbers allowed, no spaces.
+            .Matches(@"^[a-zA-Z0-9]+$")
+            .WithMessage(
+                "Only letters and numbers are allowed for the username. Special characters (including space) are not valid") //Only letters and numbers allowed, no spaces.
             .Length(5, 15).WithMessage("The allowed length for the username is between 5 and 15 characters")
             .NotEqual("admin");
 

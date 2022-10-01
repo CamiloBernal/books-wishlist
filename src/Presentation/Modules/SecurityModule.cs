@@ -1,3 +1,4 @@
+using BooksWishlist.Presentation.CodeBase;
 using BooksWishlist.Presentation.Extensions;
 
 namespace BooksWishlist.Presentation.Modules;
@@ -32,24 +33,24 @@ public static class SecurityModule
     private static void MapUserServiceEndPoint(IEndpointRouteBuilder routes)
     {
         routes.MapPost("/register",
-                async (ISecurityService securityService, [FromBody] User user, IValidator<User> userValidator) =>
+                async (ISecurityService securityService, [FromBody] User user, IValidator<User> userValidator, CancellationToken cancellationToken ) =>
                 {
                     try
                     {
-                        var userValidationResult = await userValidator.ValidateAsync(user);
+                        var userValidationResult = await userValidator.ValidateAsync(user, cancellationToken);
                         if (!userValidationResult.IsValid)
                         {
                             var errors = userValidationResult.Errors.JoinErrors();
                             return Results.BadRequest(new
                             {
-                                type = "Invalid request",
+                                type = Constants.BadRequestType,
                                 status = 400,
                                 detail = $"Errors were found in the request. {errors}",
                                 title = "Invalid request"
                             });
                         }
 
-                        await securityService.RegisterUserAsync(user);
+                        await securityService.RegisterUserAsync(user, cancellationToken);
                         return Results.Created("/register", new { Name = user.UserName, user.Email });
                     }
                     catch (Exception e)
