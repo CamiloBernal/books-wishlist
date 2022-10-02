@@ -119,7 +119,7 @@ public interface ILoggerService
         [CallerLineNumber] int lineNumber = 0,
         params object?[] args);
 
-    void LogError(string message,
+    void LogError(string? message,
         Exception exception,
         [CallerMemberName] string callerName = "",
         [CallerFilePath] string filePath = "",

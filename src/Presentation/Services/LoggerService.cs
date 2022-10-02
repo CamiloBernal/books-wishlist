@@ -208,7 +208,7 @@ public class LoggerService : ILoggerService
     }
 
 
-    public void LogError(string message,
+    public void LogError(string? message,
         Exception exception,
         [CallerMemberName] string callerName = "",
         [CallerFilePath] string filePath = "",
@@ -295,7 +295,7 @@ public class LoggerService : ILoggerService
         Watch(message, callerName, filePath, lineNumber);
     }
 
-    private static void Watch(string message,
+    private static void Watch(string? message,
         [CallerMemberName] string callerName = "",
         [CallerFilePath] string filePath = "",
         [CallerLineNumber] int lineNumber = 0) =>
