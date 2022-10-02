@@ -11,13 +11,14 @@ public class GoogleBooksService : IGoogleBooksService
         _httpClientWrapper = new HttpClientWrapper<GoogleBooksSearchResults>(log);
     }
 
-    public async Task<GoogleBooksSearchResults?> Find(string q, string apiKey, BookSearchType? searchType,
+    public async Task<GoogleBooksSearchResultDto?> Find(string q, string apiKey, BookSearchType? searchType,
         string? additionalTerm = "", CancellationToken cancellationToken = default)
     {
         if (apiKey == null) throw new ArgumentNullException(nameof(apiKey));
         var urlToHandleRequest = BuildEndPointUrl(q, apiKey, searchType, additionalTerm);
         var results = await _httpClientWrapper.GetAsync(urlToHandleRequest, cancellationToken);
-        return results;
+        if (results != null) return (GoogleBooksSearchResultDto)results;
+        return null;
     }
 
     public BookSearchType ParseSearchType(string value) => value.ToLower() switch
@@ -29,7 +30,7 @@ public class GoogleBooksService : IGoogleBooksService
         "isbn" => BookSearchType.ByIsbn,
         "lccn" => BookSearchType.InLccn,
         "oclc" => BookSearchType.InOclc,
-        _ => throw new ArgumentOutOfRangeException(nameof(value), value, "Search type not supported")
+        _ => throw new NonSupportedSearchTypeException()
     };
 
 
@@ -46,7 +47,7 @@ public class GoogleBooksService : IGoogleBooksService
             BookSearchType.InLccn => "+lccn",
             BookSearchType.InOclc => "+oclc",
             BookSearchType.FullSearch => "",
-            _ => throw new ArgumentOutOfRangeException(nameof(searchType), searchType, "Search type not supported")
+            _ => throw new NonSupportedSearchTypeException()
         };
         var query = string.IsNullOrEmpty(additionalTerm)
             ? q

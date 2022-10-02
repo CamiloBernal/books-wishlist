@@ -28,9 +28,9 @@ public static class GoogleBooksServiceModule
                 if (string.IsNullOrEmpty(term))
                     return Utils.BuildBadRequestResult("No search term provided",
                         "You must specify a search term. For example, if you want to search by author, try using '/author/{term}/q?{criteria}'");
-                var searchType = booksService.ParseSearchType(queryType);
                 try
                 {
+                    var searchType = booksService.ParseSearchType(queryType);
                     var queryResults =
                         await QueryToService(booksService, q, apiKey, searchType, term, cancellationToken);
                     return Results.Ok(queryResults);
@@ -41,6 +41,12 @@ public static class GoogleBooksServiceModule
                     return Utils.BuildBadRequestResult("Error querying the Google Books api",
                         badRequestException.Message);
                 }
+                catch (NonSupportedSearchTypeException nonSupportedSearchTypeException)
+                {
+                    log.LogError(nonSupportedSearchTypeException.Message, nonSupportedSearchTypeException);
+                    return Utils.BuildBadRequestResult("Invalid query type",
+                        nonSupportedSearchTypeException.Message);
+                }
                 catch (Exception e)
                 {
                     log.LogError(e.Message, e);
@@ -49,18 +55,15 @@ public static class GoogleBooksServiceModule
             })
         .WithTags("Google books services")
         .WithName("/books/")
-        .Produces<GoogleBooksSearchResults?>()
+        .Produces<GoogleBooksSearchResultDto?>()
         .ProducesProblem(400)
         .ProducesProblem(401)
         .ProducesProblem(500)
         .RequireAuthorization();
 
 
-    private static async Task<GoogleBooksSearchResults?> QueryToService(IGoogleBooksService booksService, string q,
+    private static async Task<GoogleBooksSearchResultDto?> QueryToService(IGoogleBooksService booksService, string q,
         string apiKey, BookSearchType? searchType, string? additionalTerm = "",
-        CancellationToken cancellationToken = default)
-    {
-        var results = await booksService.Find(q, apiKey, searchType, additionalTerm, cancellationToken);
-        return results;
-    }
+        CancellationToken cancellationToken = default) =>
+        await booksService.Find(q, apiKey, searchType, additionalTerm, cancellationToken);
 }
