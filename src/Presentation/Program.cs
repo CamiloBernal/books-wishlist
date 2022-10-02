@@ -38,6 +38,7 @@ if (app.Environment.IsDevelopment())
 {
     _ = app.UseDeveloperExceptionPage();
 }
+
 //Health check Endpoint:
 app.MapGet("/health", async (HealthCheckService healthCheckService, CancellationToken cancellationToken) =>
 {

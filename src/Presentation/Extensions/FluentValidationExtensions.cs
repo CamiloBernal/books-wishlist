@@ -19,9 +19,9 @@ public static class FluentValidationExtensions
         var errors = instanceValidationResult.Errors.JoinErrors();
         var logMessage = $"Errors were found in the request. {errors}";
         log.LogWarning(logMessage);
-        return Results.BadRequest(new
+        return Results.BadRequest(new ProblemDetails
         {
-            type = Constants.BadRequestType, status = 400, detail = logMessage, title = "Invalid request"
+            Type = Constants.BadResponseType, Status = 400, Detail = logMessage, Title = "Invalid request"
         });
     }
 }

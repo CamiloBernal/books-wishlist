@@ -8,9 +8,6 @@ public class LoggerService : ILoggerService
 
     public LoggerService(ILogger logger) => _logger = logger;
 
-
-    //private static readonly Func<FormattedLogValues, Exception?, string> _messageFormatter = MessageFormatter;
-
     public void LogDebug(EventId eventId, Exception? exception, string? message,
         [CallerMemberName] string callerName = "",
         [CallerFilePath] string filePath = "",
