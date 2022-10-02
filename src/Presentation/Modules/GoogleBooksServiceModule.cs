@@ -16,7 +16,7 @@ public static class GoogleBooksServiceModule
     private static void MapRequestBookEndpoint(IEndpointRouteBuilder routes) => routes.MapGet(
             "/books/{queryType?}/{term?}/{q?}",
             [Authorize] async (IGoogleBooksService booksService, ILoggerService log, [FromRoute] string? queryType,
-                [FromRoute] string? term, [FromQuery] string? q, [FromQuery] string? apiKey,
+                [FromRoute] string? term, [FromQuery] string? q, [FromQuery] int? page,[FromQuery] string? apiKey,
                 CancellationToken cancellationToken) =>
             {
                 if (apiKey is null)
@@ -32,7 +32,7 @@ public static class GoogleBooksServiceModule
                 {
                     var searchType = booksService.ParseSearchType(queryType);
                     var queryResults =
-                        await QueryToService(booksService, q, apiKey, searchType, term, cancellationToken);
+                        await QueryToService(booksService, q, apiKey, searchType, term, page, cancellationToken);
                     return Results.Ok(queryResults);
                 }
                 catch (GoogleServiceBadRequestException badRequestException)
@@ -63,7 +63,7 @@ public static class GoogleBooksServiceModule
 
 
     private static async Task<GoogleBooksSearchResultDto?> QueryToService(IGoogleBooksService booksService, string q,
-        string apiKey, BookSearchType? searchType, string? additionalTerm = "",
+        string apiKey, BookSearchType? searchType, string? additionalTerm = "", int? page = 0,
         CancellationToken cancellationToken = default) =>
-        await booksService.Find(q, apiKey, searchType, additionalTerm, cancellationToken);
+        await booksService.Find(q, apiKey, searchType, additionalTerm, page, cancellationToken);
 }

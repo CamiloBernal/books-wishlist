@@ -5,7 +5,9 @@ var builder = WebApplication.CreateBuilder(args);
 //Config services
 builder.Services.Configure<StoreDatabaseSettings>(builder.Configuration.GetSection("StoreDatabase"))
     .Configure<CryptoServiceSettings>(builder.Configuration.GetSection("CryptoServices"))
-    .Configure<TokenGeneratorOptions>(builder.Configuration.GetSection("TokenGeneratorOptions"));
+    .Configure<TokenGeneratorOptions>(builder.Configuration.GetSection("TokenGeneratorOptions"))
+    .Configure<GoogleBooksServiceOptions>(builder.Configuration.GetSection("GoogleServicesConfig"));
+
 
 
 var tokenOptions = builder.Configuration.GetSection("TokenGeneratorOptions").Get<TokenGeneratorOptions>();
