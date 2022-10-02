@@ -1,36 +1,18 @@
-using BooksWishlist.Presentation.Configuration;
-
 var builder = WebApplication.CreateBuilder(args);
-
-//Config services
-builder.Services.Configure<StoreDatabaseSettings>(builder.Configuration.GetSection("StoreDatabase"))
-    .Configure<CryptoServiceSettings>(builder.Configuration.GetSection("CryptoServices"))
-    .Configure<TokenGeneratorOptions>(builder.Configuration.GetSection("TokenGeneratorOptions"));
-
 
 var tokenOptions = builder.Configuration.GetSection("TokenGeneratorOptions").Get<TokenGeneratorOptions>();
 
 builder.Services.AddEndpointsApiExplorer()
+    .ConfigureBusinessServiceOptions(builder)
     .ConfigureApiVersioning()
     .AddHttpContextAccessor()
-    .AddWatchDogServices(opt => opt.IsAutoClear = true)
+    .ConfigureLogger(builder)
     .ConfigureAuthentication(tokenOptions)
     .AddEndpointsApiExplorer()
     .ConfigureOpenApi()
     .AddModelValidators()
+    .ConfigureDiContainer()
     .AddHealthChecks();
-
-//Logger
-using (var loggerFactory = LoggerFactory.Create(b => b.AddConsole()))
-{
-    var logger = loggerFactory.CreateLogger<LoggerService>();
-    builder.Services.AddSingleton(typeof(ILogger), logger);
-}
-
-//IoC
-builder.Services.AddSingleton<ILoggerService, LoggerService>()
-    .AddScoped<ISecurityService, SecurityService>()
-    .AddScoped<IGoogleBooksService, GoogleBooksService>();
 
 
 //App Config

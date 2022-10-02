@@ -6,10 +6,7 @@ public class HttpClientWrapper<T> where T : class, new()
 {
     private readonly ILoggerService _log;
 
-    public HttpClientWrapper(ILoggerService log)
-    {
-        _log = log;
-    }
+    public HttpClientWrapper(ILoggerService log) => _log = log;
 
     public async Task<T?> GetAsync(string resourceQuery, CancellationToken cancellationToken = default)
     {
@@ -24,7 +21,10 @@ public class HttpClientWrapper<T> where T : class, new()
         {
             _log.LogError(httpRequestException.Message, httpRequestException);
             if (httpRequestException.Message.ToLower().Contains("bad request"))
+            {
                 throw new GoogleServiceBadRequestException();
+            }
+
             throw;
         }
         catch (Exception e)

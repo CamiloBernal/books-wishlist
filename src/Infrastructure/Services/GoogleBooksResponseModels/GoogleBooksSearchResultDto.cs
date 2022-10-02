@@ -3,11 +3,16 @@
 public class GoogleBooksSearchResultDto
 {
     public int? TotalItems { get; set; } = 0;
+    public int? CurrentPage { get; set; } = 0;
+    public int? TotalPages { get; set; } = 0;
     public IEnumerable<BookInfoDto>? Books { get; set; }
 
     public static implicit operator GoogleBooksSearchResultDto(GoogleBooksSearchResults results)
     {
-        var dto = new GoogleBooksSearchResultDto { TotalItems = results.TotalItems, Books = results?.Items?.Select(i => new BookInfoDto
+        var dto = new GoogleBooksSearchResultDto
+        {
+            TotalItems = results.TotalItems,
+            Books = results?.Items?.Select(i => new BookInfoDto
             {
                 Id = i.Id,
                 SelfLink = i.SelfLink,

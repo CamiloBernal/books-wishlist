@@ -10,5 +10,4 @@ public enum BookSearchType
     InLccn,
     InOclc,
     FullSearch
-
 }

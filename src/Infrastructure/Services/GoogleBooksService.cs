@@ -5,20 +5,36 @@ namespace BooksWishlist.Infrastructure.Services;
 public class GoogleBooksService : IGoogleBooksService
 {
     private readonly HttpClientWrapper<GoogleBooksSearchResults> _httpClientWrapper;
+    private readonly ILoggerService _log;
+    private readonly GoogleBooksServiceOptions _serviceOptions;
 
-    public GoogleBooksService(ILoggerService log)
+    public GoogleBooksService(ILoggerService log, IOptions<GoogleBooksServiceOptions> serviceOptions)
     {
+        _log = log;
+        _serviceOptions = serviceOptions.Value;
         _httpClientWrapper = new HttpClientWrapper<GoogleBooksSearchResults>(log);
     }
 
     public async Task<GoogleBooksSearchResultDto?> Find(string q, string apiKey, BookSearchType? searchType,
-        string? additionalTerm = "", CancellationToken cancellationToken = default)
+        string? additionalTerm = "", int? page = 0, CancellationToken cancellationToken = default)
     {
-        if (apiKey == null) throw new ArgumentNullException(nameof(apiKey));
-        var urlToHandleRequest = BuildEndPointUrl(q, apiKey, searchType, additionalTerm);
+        if (apiKey == null)
+        {
+            throw new ArgumentNullException(nameof(apiKey));
+        }
+
+        var urlToHandleRequest = BuildEndPointUrl(q, apiKey, searchType, additionalTerm, page);
+        _log.LogInformation($"Querying the GoogleBooks service through the url: {urlToHandleRequest}");
         var results = await _httpClientWrapper.GetAsync(urlToHandleRequest, cancellationToken);
-        if (results != null) return (GoogleBooksSearchResultDto)results;
-        return null;
+        if (results == null)
+        {
+            return null;
+        }
+
+        var resultsDto = (GoogleBooksSearchResultDto)results;
+        resultsDto.CurrentPage = page ?? 1;
+        resultsDto.TotalPages = resultsDto.TotalItems / _serviceOptions.MaxResults;
+        return resultsDto;
     }
 
     public BookSearchType ParseSearchType(string value) => value.ToLower() switch
@@ -33,9 +49,19 @@ public class GoogleBooksService : IGoogleBooksService
         _ => throw new NonSupportedSearchTypeException()
     };
 
+    private int? BuildStartIndexParameter(int? page = 0)
+    {
+        if (page == 0)
+        {
+            return null;
+        }
 
-    private static string BuildEndPointUrl(string q, string apiKey, BookSearchType? searchType,
-        string? additionalTerm = "")
+        var maxResults = _serviceOptions.MaxResults;
+        return (page - 1) * maxResults;
+    }
+
+    private string BuildEndPointUrl(string q, string apiKey, BookSearchType? searchType,
+        string? additionalTerm = "", int? page = 0)
     {
         var searchTypeKeyWord = searchType switch
         {
@@ -49,10 +75,17 @@ public class GoogleBooksService : IGoogleBooksService
             BookSearchType.FullSearch => "",
             _ => throw new NonSupportedSearchTypeException()
         };
+        var startIndex = BuildStartIndexParameter(page);
         var query = string.IsNullOrEmpty(additionalTerm)
             ? q
-            : $"{searchTypeKeyWord}:{additionalTerm}: {additionalTerm}";
-        var urlToHandleRequest = $"{Constants.GoogleBooksServiceQueryBase}{query}&projection=lite&key={apiKey}";
+            : $"{q}{searchTypeKeyWord}:{additionalTerm}";
+        var urlToHandleRequest =
+            $"{Constants.GoogleBooksServiceQueryBase}{query}&projection=lite&maxResults={_serviceOptions.MaxResults}&key={apiKey}";
+        if (startIndex.HasValue)
+        {
+            urlToHandleRequest += $"&startIndex={startIndex}";
+        }
+
         return urlToHandleRequest;
     }
 }
