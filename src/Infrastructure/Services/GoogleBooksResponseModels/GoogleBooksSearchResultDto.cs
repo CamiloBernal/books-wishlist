@@ -9,7 +9,10 @@ public class GoogleBooksSearchResultDto
 
     public static implicit operator GoogleBooksSearchResultDto(GoogleBooksSearchResults results)
     {
-        var dto = new GoogleBooksSearchResultDto { TotalItems = results.TotalItems, Books = results?.Items?.Select(i => new BookInfoDto
+        var dto = new GoogleBooksSearchResultDto
+        {
+            TotalItems = results.TotalItems,
+            Books = results?.Items?.Select(i => new BookInfoDto
             {
                 Id = i.Id,
                 SelfLink = i.SelfLink,

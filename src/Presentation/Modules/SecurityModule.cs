@@ -1,7 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using BooksWishlist.Application.Exceptions;
-using BooksWishlist.Presentation.Configuration;
 using BooksWishlist.Presentation.Extensions;
 using BooksWishlist.Presentation.Models;
 using Microsoft.Extensions.Options;
@@ -61,8 +60,10 @@ public static class SecurityModule
                         {
                             return Results.Unauthorized();
                         }
+
                         var token = GenerateToken(loggedUser, tokenGeneratorOptions);
-                        log.LogInformation($"An authentication token has been generated for user {loggedUser.UserName}");
+                        log.LogInformation(
+                            $"An authentication token has been generated for user {loggedUser.UserName}");
                         return Results.Json(token);
                     }
                     catch (Exception e)

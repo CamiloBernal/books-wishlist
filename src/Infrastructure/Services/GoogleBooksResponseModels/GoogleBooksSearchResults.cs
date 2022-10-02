@@ -1,4 +1,5 @@
 ﻿// ReSharper disable ClassNeverInstantiated.Global
+
 namespace BooksWishlist.Infrastructure.Services.GoogleBooksResponseModels;
 
 public class GoogleBooksSearchResults
