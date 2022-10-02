@@ -109,12 +109,13 @@ public static class SecurityModule
 
     private static AuthTokenResponse GenerateToken(User loggedInUser, IOptions<TokenGeneratorOptions> options)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, loggedInUser.UserName!),
-            new Claim(JwtRegisteredClaimNames.Name, loggedInUser.UserName!),
-            new Claim(JwtRegisteredClaimNames.Email, loggedInUser.Email!)
+            new(JwtRegisteredClaimNames.Sub, loggedInUser.UserName),
+            new(JwtRegisteredClaimNames.Name, loggedInUser.UserName),
         };
+        if (!string.IsNullOrEmpty(loggedInUser.Email))
+            claims.Add(new Claim(JwtRegisteredClaimNames.Email, loggedInUser.Email!));
 
         var issuer = options.Value.Issuer;
         var audience = options.Value.Audience;
