@@ -29,7 +29,8 @@ using (var loggerFactory = LoggerFactory.Create(b => b.AddConsole()))
 
 //IoC
 builder.Services.AddSingleton<ILoggerService, LoggerService>()
-    .AddScoped<ISecurityService, SecurityService>();
+    .AddScoped<ISecurityService, SecurityService>()
+    .AddScoped<IGoogleBooksService, GoogleBooksService>();
 
 
 //App Config
