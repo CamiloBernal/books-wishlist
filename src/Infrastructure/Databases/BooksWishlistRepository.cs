@@ -1,9 +1,5 @@
-using System.Linq.Expressions;
 using BooksWishlist.Infrastructure.Services;
-using BooksWishlist.Infrastructure.Settings;
-using Microsoft.Extensions.Options;
 using MongoDB.Bson.Serialization.Conventions;
-using MongoDB.Driver;
 
 namespace BooksWishlist.Infrastructure.Databases;
 
@@ -41,7 +37,7 @@ public class BooksWishlistRepository<T> where T : class, new()
     {
         try
         {
-            return await _collection.Find(_ => true).ToListAsync(cancellationToken: cancellationToken);
+            return await _collection.Find(_ => true).ToListAsync(cancellationToken);
         }
         catch (Exception e)
         {
@@ -50,11 +46,11 @@ public class BooksWishlistRepository<T> where T : class, new()
         }
     }
 
-    public async Task<T> GetAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default)
+    public async Task<T?> GetAsync(FilterDefinition<T> filterDefinition, CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _collection.Find(filter).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            return await _collection.Find(filterDefinition).FirstOrDefaultAsync(cancellationToken);
         }
         catch (Exception e)
         {
@@ -63,7 +59,8 @@ public class BooksWishlistRepository<T> where T : class, new()
         }
     }
 
-    public async Task<long> CountAsync(FilterDefinition<T> filterDefinition, CancellationToken cancellationToken = default)
+    public async Task<long> CountAsync(FilterDefinition<T> filterDefinition,
+        CancellationToken cancellationToken = default)
     {
         try
         {

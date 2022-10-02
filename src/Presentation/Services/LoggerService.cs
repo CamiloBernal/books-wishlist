@@ -6,10 +6,7 @@ public class LoggerService : ILoggerService
 {
     private readonly ILogger _logger;
 
-    public LoggerService(ILogger logger)
-    {
-        _logger = logger;
-    }
+    public LoggerService(ILogger logger) => _logger = logger;
 
 
     //private static readonly Func<FormattedLogValues, Exception?, string> _messageFormatter = MessageFormatter;
@@ -301,58 +298,6 @@ public class LoggerService : ILoggerService
     private static void Watch(string message,
         [CallerMemberName] string callerName = "",
         [CallerFilePath] string filePath = "",
-        [CallerLineNumber] int lineNumber = 0)
-    {
+        [CallerLineNumber] int lineNumber = 0) =>
         WatchLogger.Log(message, callerName, filePath, lineNumber);
-    }
-
-
-    // private static void Log(string message, [CallerMemberName] string callerName = "",
-    //     [CallerFilePath] string filePath = "",
-    //     [CallerLineNumber] int lineNumber = 0)
-    // {
-    //     WatchLogger.Log(message, callerName, filePath, lineNumber);
-    // }
-    //
-    // public IDisposable BeginScope<TState>(TState state) => default!;
-    //
-    // public bool IsEnabled(LogLevel logLevel) => true;
-    //
-    //
-    // public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
-    //     Func<TState, Exception?, string> formatter)
-    // {
-    //     if (state is null) return;
-    //     var originalColor = Console.ForegroundColor;
-    //     var color = logLevel switch
-    //     {
-    //         LogLevel.Trace => ConsoleColor.Gray,
-    //         LogLevel.Debug => ConsoleColor.Cyan,
-    //         LogLevel.Information => ConsoleColor.Green,
-    //         LogLevel.Warning => ConsoleColor.Yellow,
-    //         LogLevel.Error => ConsoleColor.Red,
-    //         LogLevel.Critical => ConsoleColor.Magenta,
-    //         LogLevel.None => originalColor,
-    //         _ => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null)
-    //     };
-    //
-    //     Console.ForegroundColor = color;
-    //     if (exception != null)
-    //     {
-    //         HandleError(exception);
-    //     }
-    //     else
-    //     {
-    //         Console.WriteLine($"{logLevel}: {state}");
-    //         Log(state?.ToString() ?? string.Empty);
-    //     }
-    //
-    //     Console.ForegroundColor = originalColor;
-    // }
-    //
-    // private static void HandleError(Exception ex)
-    // {
-    //     var errorWriter = Console.Error;
-    //     errorWriter.WriteLine(ex.Message);
-    // }
 }

@@ -168,4 +168,3 @@ public interface ILoggerService
         [CallerLineNumber] int lineNumber = 0,
         params object?[] args);
 }
-

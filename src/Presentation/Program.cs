@@ -1,15 +1,20 @@
+using BooksWishlist.Presentation.Configuration;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var issuer = builder.Configuration["Issuer"];
-var audience = builder.Configuration["Audience"];
-var signingKey = builder.Configuration["SigningKey"];
+//Config services
+builder.Services.Configure<StoreDatabaseSettings>(builder.Configuration.GetSection("StoreDatabase"))
+    .Configure<CryptoServiceSettings>(builder.Configuration.GetSection("CryptoServices"))
+    .Configure<TokenGeneratorOptions>(builder.Configuration.GetSection("TokenGeneratorOptions"));
+
+
+var tokenOptions = builder.Configuration.GetSection("TokenGeneratorOptions").Get<TokenGeneratorOptions>();
 
 builder.Services.AddEndpointsApiExplorer()
     .ConfigureApiVersioning()
     .AddHttpContextAccessor()
     .AddAuthorization()
-    .ConfigureAuthentication(issuer, audience, signingKey)
+    .ConfigureAuthentication(tokenOptions)
     .AddEndpointsApiExplorer()
     .ConfigureOpenApi()
     .AddWatchDogServices(opt => opt.IsAutoClear = true)
@@ -27,9 +32,6 @@ using (var loggerFactory = LoggerFactory.Create(b => b.AddConsole()))
 builder.Services.AddSingleton<ILoggerService, LoggerService>()
     .AddScoped<ISecurityService, SecurityService>();
 
-//Config services
-builder.Services.Configure<StoreDatabaseSettings>(builder.Configuration.GetSection("StoreDatabase"))
-    .Configure<CryptoServiceSettings>(builder.Configuration.GetSection("CryptoServices"));
 
 //App Config
 var app = builder.Build();

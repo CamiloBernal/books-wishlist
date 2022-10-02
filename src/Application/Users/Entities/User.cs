@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using BooksWishlist.Application.Common;
 
 namespace BooksWishlist.Application.Users.Entities;

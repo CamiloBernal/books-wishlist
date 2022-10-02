@@ -13,6 +13,7 @@ global using BooksWishlist.Application.Common;
 global using BooksWishlist.Application.Users.Entities;
 global using BooksWishlist.Infrastructure.Services;
 global using BooksWishlist.Infrastructure.Settings;
+global using BooksWishlist.Presentation.CodeBase;
 global using BooksWishlist.Presentation.Services;
 global using BooksWishlist.Presentation.ViewModels;
 global using FluentValidation;
