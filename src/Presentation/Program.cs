@@ -13,11 +13,10 @@ var tokenOptions = builder.Configuration.GetSection("TokenGeneratorOptions").Get
 builder.Services.AddEndpointsApiExplorer()
     .ConfigureApiVersioning()
     .AddHttpContextAccessor()
-    .AddAuthorization()
+    .AddWatchDogServices(opt => opt.IsAutoClear = true)
     .ConfigureAuthentication(tokenOptions)
     .AddEndpointsApiExplorer()
     .ConfigureOpenApi()
-    .AddWatchDogServices(opt => opt.IsAutoClear = true)
     .AddModelValidators()
     .AddHealthChecks();
 
@@ -35,29 +34,11 @@ builder.Services.AddSingleton<ILoggerService, LoggerService>()
 
 //App Config
 var app = builder.Build();
-
-
-app.UseWatchDogExceptionLogger()
-    .UseHttpsRedirection()
-    .UseSwagger()
-    .UseSwaggerUI()
-    .UseHttpsRedirection()
-    .UseAuthentication()
-    .UseAuthorization()
-    .UseRouting()
-    .UseWatchDog(opt =>
-    {
-        opt.WatchPageUsername = "MELI";
-        opt.WatchPagePassword = "MeliUser1234";
-    });
-
 if (app.Environment.IsDevelopment())
 {
     _ = app.UseDeveloperExceptionPage();
 }
-
 //Health check Endpoint:
-
 app.MapGet("/health", async (HealthCheckService healthCheckService, CancellationToken cancellationToken) =>
 {
     WatchLogger.Log($"Health check validation at: {DateTime.UtcNow} (UTC)");
@@ -67,7 +48,23 @@ app.MapGet("/health", async (HealthCheckService healthCheckService, Cancellation
         : Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
 }).WithTags("Health").Produces(200).ProducesProblem(503).ProducesProblem(401);
 
-app.MapSecurityEndpoints();
+//Map Business EndPoints
+app.MapSecurityEndpoints()
+    .MapBooksServiceEndpoints();
+
+
+app.UseWatchDogExceptionLogger()
+    .UseRouting()
+    .UseAuthentication()
+    .UseAuthorization()
+    .UseWatchDog(opt =>
+    {
+        opt.WatchPageUsername = "MELI";
+        opt.WatchPagePassword = "MeliUser1234";
+    })
+    .UseHttpsRedirection()
+    .UseSwagger()
+    .UseSwaggerUI();
 
 //Run The App
 WatchLogger.Log("...Starting Host...");

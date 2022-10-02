@@ -12,7 +12,8 @@ public static class SecurityModule
     public static IServiceCollection ConfigureAuthentication(this IServiceCollection services,
         TokenGeneratorOptions tokenOptions)
     {
-        _ = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        _ = services.AddAuthorization()
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateActor = true,
@@ -34,7 +35,7 @@ public static class SecurityModule
         return routes;
     }
 
-    private static void MapRequestTokenEndpoint(this IEndpointRouteBuilder routes) =>
+    private static void MapRequestTokenEndpoint(IEndpointRouteBuilder routes) =>
         routes.MapPost("/auth/token",
                 async (ISecurityService securityService,
                     ILoggerService log,
