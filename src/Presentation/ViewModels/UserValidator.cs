@@ -13,7 +13,6 @@ public class UserValidator : AbstractValidator<User>
             .NotEqual("admin");
 
         RuleFor(u => u.Email)
-            .NotEmpty()
             .EmailAddress();
 
         RuleFor(u => u.Password)

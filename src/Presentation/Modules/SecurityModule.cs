@@ -12,7 +12,8 @@ public static class SecurityModule
     public static IServiceCollection ConfigureAuthentication(this IServiceCollection services,
         TokenGeneratorOptions tokenOptions)
     {
-        _ = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        _ = services.AddAuthorization()
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateActor = true,
@@ -34,7 +35,7 @@ public static class SecurityModule
         return routes;
     }
 
-    private static void MapRequestTokenEndpoint(this IEndpointRouteBuilder routes) =>
+    private static void MapRequestTokenEndpoint(IEndpointRouteBuilder routes) =>
         routes.MapPost("/auth/token",
                 async (ISecurityService securityService,
                     ILoggerService log,
@@ -109,12 +110,13 @@ public static class SecurityModule
 
     private static AuthTokenResponse GenerateToken(User loggedInUser, IOptions<TokenGeneratorOptions> options)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, loggedInUser.UserName!),
-            new Claim(JwtRegisteredClaimNames.Name, loggedInUser.UserName!),
-            new Claim(JwtRegisteredClaimNames.Email, loggedInUser.Email!)
+            new(JwtRegisteredClaimNames.Sub, loggedInUser.UserName),
+            new(JwtRegisteredClaimNames.Name, loggedInUser.UserName),
         };
+        if (!string.IsNullOrEmpty(loggedInUser.Email))
+            claims.Add(new Claim(JwtRegisteredClaimNames.Email, loggedInUser.Email!));
 
         var issuer = options.Value.Issuer;
         var audience = options.Value.Audience;
