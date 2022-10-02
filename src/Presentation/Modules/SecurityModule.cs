@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using BooksWishlist.Application.Exceptions;
 using BooksWishlist.Presentation.Configuration;
 using BooksWishlist.Presentation.Extensions;
 using BooksWishlist.Presentation.Models;
@@ -36,7 +37,7 @@ public static class SecurityModule
     }
 
     private static void MapRequestTokenEndpoint(IEndpointRouteBuilder routes) =>
-        routes.MapPost("/auth/token",
+        routes.MapPost("/sign-in",
                 async (ISecurityService securityService,
                     ILoggerService log,
                     [FromBody] TokenRequestDto tokenRequest,
@@ -60,8 +61,8 @@ public static class SecurityModule
                         {
                             return Results.Unauthorized();
                         }
-
                         var token = GenerateToken(loggedUser, tokenGeneratorOptions);
+                        log.LogInformation($"An authentication token has been generated for user {loggedUser.UserName}");
                         return Results.Json(token);
                     }
                     catch (Exception e)
@@ -74,11 +75,11 @@ public static class SecurityModule
             .ProducesProblem(401)
             .ProducesProblem(500)
             .WithTags("Security")
-            .WithName("auth/token")
+            .WithName("/sign-in")
             .WithDisplayName("Request token");
 
     private static void MapUserServiceEndPoint(IEndpointRouteBuilder routes) =>
-        routes.MapPost("/register",
+        routes.MapPost("/sign-up",
                 async (ISecurityService securityService, ILoggerService log, [FromBody] User user,
                     IValidator<User> userValidator, CancellationToken cancellationToken) =>
                 {
@@ -92,7 +93,18 @@ public static class SecurityModule
                         }
 
                         await securityService.RegisterUserAsync(user, cancellationToken);
-                        return Results.Created("/register", new { Name = user.UserName, user.Email });
+                        return Results.Created("/sign-up", new { Name = user.UserName, user.Email });
+                    }
+                    catch (DuplicateUserException duplicateUserException)
+                    {
+                        log.LogError(duplicateUserException.Message, duplicateUserException);
+                        return Results.Conflict(new ProblemDetails
+                        {
+                            Type = Constants.ConflictResponseType,
+                            Title = "The username is already taken",
+                            Status = 409,
+                            Detail = duplicateUserException.Message
+                        });
                     }
                     catch (Exception e)
                     {
@@ -103,8 +115,9 @@ public static class SecurityModule
             .Produces<User>(201)
             .ProducesProblem(400)
             .ProducesProblem(500)
+            .ProducesProblem(409)
             .WithTags("Security")
-            .WithName("/register")
+            .WithName("/sign-up")
             .WithDisplayName("User registration");
 
 
@@ -113,10 +126,12 @@ public static class SecurityModule
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, loggedInUser.UserName),
-            new(JwtRegisteredClaimNames.Name, loggedInUser.UserName),
+            new(JwtRegisteredClaimNames.Name, loggedInUser.UserName)
         };
         if (!string.IsNullOrEmpty(loggedInUser.Email))
+        {
             claims.Add(new Claim(JwtRegisteredClaimNames.Email, loggedInUser.Email!));
+        }
 
         var issuer = options.Value.Issuer;
         var audience = options.Value.Audience;
