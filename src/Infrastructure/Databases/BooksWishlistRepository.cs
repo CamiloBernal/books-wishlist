@@ -32,7 +32,7 @@ public class BooksWishlistRepository<T> where T : class, new()
 
     private static void Configure()
     {
-        var pack = new ConventionPack { new GuidObjectIdConvention() };
+        var pack = new ConventionPack { new StringObjectIdConvention() };
         ConventionRegistry.Register("GuidObjectIdConvention", pack, _ => true);
     }
 
@@ -50,7 +50,7 @@ public class BooksWishlistRepository<T> where T : class, new()
         }
     }
 
-    public async Task<T?> GetAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default)
+    public async Task<T> GetAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -62,6 +62,20 @@ public class BooksWishlistRepository<T> where T : class, new()
             throw;
         }
     }
+
+    public async Task<long> CountAsync(FilterDefinition<T> filterDefinition, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _collection.CountDocumentsAsync(filterDefinition, cancellationToken: cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Error with a query in the {_collection} collection.", e);
+            throw;
+        }
+    }
+
 
     public async Task CreateAsync(T newEntity, CancellationToken cancellationToken = default)
     {
