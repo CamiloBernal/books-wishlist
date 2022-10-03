@@ -10,11 +10,44 @@ public static class UserWishlistsModule
 {
     public static IEndpointRouteBuilder MapUserWishlistsEndpoints(this IEndpointRouteBuilder routes)
     {
-        MapWishlistsEndpoints(routes);
+        MapCreateWishListEndpoint(routes);
+        MapListWishlistsEndpoint(routes);
         return routes;
     }
 
-    private static void MapWishlistsEndpoints(IEndpointRouteBuilder routes) =>
+    private static void MapListWishlistsEndpoint(IEndpointRouteBuilder routes)
+    {
+        routes.MapGet("/wishlists", [Authorize]
+                async (HttpContext ctx, IUserWishlistsRepository wishlistsRepository, ILoggerService log,
+                    CancellationToken cancellationToken) =>
+                {
+                    var currentUser = ctx.User.Identity?.Name;
+                    if (currentUser is null)
+                    {
+                        return Results.Unauthorized();
+                    }
+
+                    try
+                    {
+                        var userLists = await wishlistsRepository.FindByOwnerAsync(currentUser, cancellationToken);
+                        return Results.Ok(userLists);
+                    }
+                    catch (Exception e)
+                    {
+                        log.LogError(e.Message, e);
+                        return Results.Problem(e.Message, title: "Error creating the wishlist");
+                    }
+                })
+            .WithName("wishlists")
+            .WithTags("Business Endpoints")
+            .Produces<IEnumerable<UserWishlists>>()
+            .ProducesProblem(400)
+            .ProducesProblem(401)
+            .ProducesProblem(500)
+            .RequireAuthorization();
+    }
+
+    private static void MapCreateWishListEndpoint(IEndpointRouteBuilder routes) =>
         routes.MapPost("/wishlists", [Authorize] async (IUserWishlistsRepository wishlistsRepository,
                 IGoogleBooksService booksService,
                 ILoggerService log, HttpContext ctx, [FromBody] WishlistDto wishlist,
