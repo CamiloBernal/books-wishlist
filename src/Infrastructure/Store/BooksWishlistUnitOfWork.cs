@@ -43,7 +43,20 @@ public class BooksWishlistUnitOfWork<T> where T : class, new()
         }
     }
 
-    public async Task<T?> GetAsync(FilterDefinition<T> filterDefinition, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<T?>> GetAsync(FilterDefinition<T> filterDefinition, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _collection.Find(filterDefinition).ToListAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Error with a query in the {_collection} collection.", e);
+            throw;
+        }
+    }
+
+    public async Task<T?> GetOneAsync(FilterDefinition<T> filterDefinition, CancellationToken cancellationToken = default)
     {
         try
         {

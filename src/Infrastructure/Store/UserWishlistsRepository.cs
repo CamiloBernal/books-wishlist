@@ -26,7 +26,14 @@ public class UserWishlistsRepository : IUserWishlistsRepository
     public async Task<UserWishlists?> FindByName(string name, CancellationToken cancellationToken = default)
     {
         var filterDefinition = GetFilterByListName(name);
-        return await _unitOfWork.GetAsync(filterDefinition, cancellationToken);
+        return await _unitOfWork.GetOneAsync(filterDefinition, cancellationToken);
+    }
+
+
+    public async Task<IEnumerable<UserWishlists?>> FindByOwnerAsync(string owner, CancellationToken cancellationToken = default)
+    {
+        var filterDefinition = new FilterDefinitionBuilder<UserWishlists>().Eq(l => l.OwnerId, owner);
+        return  await _unitOfWork.GetAsync(filterDefinition, cancellationToken);
     }
 
     private static FilterDefinition<UserWishlists> GetFilterByListName(string name) =>

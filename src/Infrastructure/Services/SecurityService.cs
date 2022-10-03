@@ -39,7 +39,7 @@ public class SecurityService : ISecurityService
     public async Task<User?> ValidateUser(User user, CancellationToken cancellationToken = default)
     {
         var filterDefinition = GetFilterByUserName(user.UserName);
-        var foundUser = await _unitOfWork.GetAsync(filterDefinition, cancellationToken);
+        var foundUser = await _unitOfWork.GetOneAsync(filterDefinition, cancellationToken);
         if (foundUser is null)
         {
             return null;
