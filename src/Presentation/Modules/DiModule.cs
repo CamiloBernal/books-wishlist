@@ -1,4 +1,4 @@
-﻿using BooksWishlist.Infrastructure.Databases;
+﻿using BooksWishlist.Infrastructure.Store;
 
 namespace BooksWishlist.Presentation.Modules;
 

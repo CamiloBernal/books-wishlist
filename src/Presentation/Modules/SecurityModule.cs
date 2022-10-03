@@ -128,7 +128,7 @@ public static class SecurityModule
         {
             new(JwtRegisteredClaimNames.Sub, loggedInUser.UserName),
             new(JwtRegisteredClaimNames.Name, loggedInUser.UserName),
-            new(JwtRegisteredClaimNames.UniqueName  , loggedInUser.Id)
+            new(JwtRegisteredClaimNames.UniqueName, loggedInUser.Id)
         };
         if (!string.IsNullOrEmpty(loggedInUser.Email))
         {

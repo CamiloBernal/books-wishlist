@@ -1,7 +1,4 @@
-using BooksWishlist.Infrastructure.Services;
-using MongoDB.Bson.Serialization.Conventions;
-
-namespace BooksWishlist.Infrastructure.Databases;
+namespace BooksWishlist.Infrastructure.Store;
 
 public class BooksWishlistUnitOfWork<T> where T : class, new()
 {

@@ -1,3 +1,5 @@
+using BooksWishlist.Infrastructure.Store;
+
 namespace BooksWishlist.Infrastructure.Services;
 
 public class SecurityService : ISecurityService

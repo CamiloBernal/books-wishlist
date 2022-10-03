@@ -1,7 +1,4 @@
-﻿using BooksWishlist.Application.UserWishlists.Entities;
-using BooksWishlist.Infrastructure.Services;
-
-namespace BooksWishlist.Infrastructure.Databases;
+﻿namespace BooksWishlist.Infrastructure.Store;
 
 public class UserWishlistsRepository : IUserWishlistsRepository
 {
@@ -40,11 +37,8 @@ public class UserWishlistsRepository : IUserWishlistsRepository
         CancellationToken cancellationToken = default)
     {
         var filterByName = GetFilterByListName(listName);
-        var filterDefinition = new FilterDefinitionBuilder<UserWishlists>().And(new[]
-            {
-                filterByName, new FilterDefinitionBuilder<UserWishlists>().Eq(l => l.OwnerId, owner)
-            }
-        );
+        var filterDefinition = new FilterDefinitionBuilder<UserWishlists>().And(filterByName,
+            new FilterDefinitionBuilder<UserWishlists>().Eq(l => l.OwnerId, owner));
         var count = await _unitOfWork.CountAsync(filterDefinition, cancellationToken);
         return count > 0;
     }

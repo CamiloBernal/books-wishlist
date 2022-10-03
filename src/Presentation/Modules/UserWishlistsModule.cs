@@ -1,6 +1,6 @@
 ﻿using BooksWishlist.Application.Exceptions;
 using BooksWishlist.Application.UserWishlists.Entities;
-using BooksWishlist.Infrastructure.Databases;
+using BooksWishlist.Infrastructure.Store;
 using BooksWishlist.Presentation.Extensions;
 
 namespace BooksWishlist.Presentation.Modules;
@@ -30,7 +30,11 @@ public static class UserWishlistsModule
                     }
 
                     var currentUser = ctx.User.Identity?.Name;
-                    if (currentUser is null) return Results.Unauthorized();
+                    if (currentUser is null)
+                    {
+                        return Results.Unauthorized();
+                    }
+
                     var userWishList = (UserWishlists)wishlist;
                     userWishList.OwnerId = currentUser;
                     var createdList = await wishlistsRepository.Create(userWishList, cancellationToken);

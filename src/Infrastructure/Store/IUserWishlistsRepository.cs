@@ -1,6 +1,4 @@
-﻿using BooksWishlist.Application.UserWishlists.Entities;
-
-namespace BooksWishlist.Infrastructure.Databases;
+﻿namespace BooksWishlist.Infrastructure.Store;
 
 public interface IUserWishlistsRepository
 {
