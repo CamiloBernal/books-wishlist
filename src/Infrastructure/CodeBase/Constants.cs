@@ -4,4 +4,5 @@ public static class Constants
 {
     public const string GoogleBooksServiceUrlBase = "https://www.googleapis.com";
     public const string GoogleBooksServiceQueryBase = "/books/v1/volumes?q=";
+    public const string GoogleBooksServiceVolumesBase = "/books/v1/volumes/";
 }

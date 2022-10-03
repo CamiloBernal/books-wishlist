@@ -1,4 +1,5 @@
-﻿using BooksWishlist.Application.Exceptions;
+﻿using BooksWishlist.Application.Books.Entities;
+using BooksWishlist.Application.Exceptions;
 using BooksWishlist.Application.UserWishlists.Entities;
 using BooksWishlist.Infrastructure.Store;
 using BooksWishlist.Presentation.Extensions;
@@ -15,10 +16,18 @@ public static class UserWishlistsModule
 
     private static void MapWishlistsEndpoints(IEndpointRouteBuilder routes) =>
         routes.MapPost("/wishlists", [Authorize] async (IUserWishlistsRepository wishlistsRepository,
+                IGoogleBooksService booksService,
                 ILoggerService log, HttpContext ctx, [FromBody] WishlistDto wishlist,
+                [FromQuery] string? apiKey,
                 IValidator<WishlistDto> wishlistsDtoValidator,
                 CancellationToken cancellationToken) =>
             {
+                if (apiKey is null)
+                {
+                    return Utils.BuildBadRequestResult("Query ApiKey not provided",
+                        "You must provide your query ApiKey for the Google Books service");
+                }
+
                 try
                 {
                     var validationResult =
@@ -37,6 +46,9 @@ public static class UserWishlistsModule
 
                     var userWishList = (UserWishlists)wishlist;
                     userWishList.OwnerId = currentUser;
+                    var validBooks =
+                        await ValidateAndBindBookIdListAsync(booksService, wishlist.Books, apiKey, cancellationToken)!;
+                    userWishList.Books = validBooks;
                     var createdList = await wishlistsRepository.Create(userWishList, cancellationToken);
                     return Results.Created("/wishlist", createdList);
                 }
@@ -51,6 +63,11 @@ public static class UserWishlistsModule
                         Detail = duplicateUserException.Message
                     });
                 }
+                catch (InvalidBookReferenceException invalidBookReferenceException)
+                {
+                    log.LogError(invalidBookReferenceException.Message, invalidBookReferenceException);
+                    return Utils.BuildBadRequestResult("Invalid Book Reference", invalidBookReferenceException.Message);
+                }
                 catch (Exception e)
                 {
                     log.LogError(e.Message, e);
@@ -64,4 +81,12 @@ public static class UserWishlistsModule
             .ProducesProblem(401)
             .ProducesProblem(500)
             .RequireAuthorization();
+
+
+    private static async Task<IEnumerable<Book?>?>? ValidateAndBindBookIdListAsync(IGoogleBooksService booksService,
+        IEnumerable<string>? booksIds, string apiKey, CancellationToken cancellationToken = default)
+    {
+        var validBooks = await booksService.ValidateAndBindWishListBooksAsync(booksIds, apiKey, cancellationToken)!;
+        return validBooks;
+    }
 }

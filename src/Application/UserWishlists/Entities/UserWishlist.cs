@@ -15,5 +15,5 @@ public class UserWishlists
 
     public IEnumerable<string>? Tags { get; set; } = new List<string>();
 
-    public IEnumerable<Book>? Books { get; set; } = new List<Book>();
+    public IEnumerable<Book?>? Books { get; set; } = new List<Book>();
 }
