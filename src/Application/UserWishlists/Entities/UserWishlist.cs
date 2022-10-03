@@ -1,14 +1,13 @@
-using BooksWishlist.Application.Books.Entities;
-
 namespace BooksWishlist.Application.UserWishlists.Entities;
 
 public class UserWishlists
 {
-    public Guid Owner { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public string OwnerId { get; set; }
 
     public string Name { get; set; }
 
-    public DateTime CreatedDate { get; set; }
+    public DateTime CreatedDateUtc { get; set; } = DateTime.UtcNow;
 
     public string? Description { get; set; }
 

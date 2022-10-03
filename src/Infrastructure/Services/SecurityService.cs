@@ -6,13 +6,13 @@ public class SecurityService : ISecurityService
 {
     private readonly CryptoService _crypto;
     private readonly ILoggerService _log;
-    private readonly BooksWishlistRepository<User> _repository;
+    private readonly BooksWishlistUnitOfWork<User> _unitOfWork;
 
     public SecurityService(ILoggerService log, IOptions<StoreDatabaseSettings> storeSettings,
         IOptions<CryptoServiceSettings> cryptoSettings)
     {
         _log = log;
-        _repository = new BooksWishlistRepository<User>(storeSettings, log, "Users");
+        _unitOfWork = new BooksWishlistUnitOfWork<User>(storeSettings, log, "Users");
         _crypto = new CryptoService(cryptoSettings);
     }
 
@@ -31,7 +31,7 @@ public class SecurityService : ISecurityService
 
         user.Password = _crypto.EncryptString(user.Password);
         _log.LogInformation("User registration requested");
-        await _repository.CreateAsync(user, cancellationToken);
+        await _unitOfWork.CreateAsync(user, cancellationToken);
         _log.LogInformation($"A new user has been registered in the database: {user.UserName}");
         return true;
     }
@@ -39,7 +39,7 @@ public class SecurityService : ISecurityService
     public async Task<User?> ValidateUser(User user, CancellationToken cancellationToken = default)
     {
         var filterDefinition = GetFilterByUserName(user.UserName);
-        var foundUser = await _repository.GetAsync(filterDefinition, cancellationToken);
+        var foundUser = await _unitOfWork.GetAsync(filterDefinition, cancellationToken);
         if (foundUser is null)
         {
             return null;
@@ -56,7 +56,7 @@ public class SecurityService : ISecurityService
     private async Task<bool> UserExists(string userName, CancellationToken cancellationToken = default)
     {
         var filterDefinition = GetFilterByUserName(userName);
-        var count = await _repository.CountAsync(filterDefinition, cancellationToken);
+        var count = await _unitOfWork.CountAsync(filterDefinition, cancellationToken);
         return count > 0;
     }
 }

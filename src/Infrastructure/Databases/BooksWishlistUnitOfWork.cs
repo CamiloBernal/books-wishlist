@@ -3,12 +3,12 @@ using MongoDB.Bson.Serialization.Conventions;
 
 namespace BooksWishlist.Infrastructure.Databases;
 
-public class BooksWishlistRepository<T> where T : class, new()
+public class BooksWishlistUnitOfWork<T> where T : class, new()
 {
     private readonly IMongoCollection<T> _collection;
     private readonly ILoggerService _logger;
 
-    public BooksWishlistRepository(IOptions<StoreDatabaseSettings> storeSettings, ILoggerService logger,
+    public BooksWishlistUnitOfWork(IOptions<StoreDatabaseSettings> storeSettings, ILoggerService logger,
         string collectionName)
     {
         _logger = logger;
