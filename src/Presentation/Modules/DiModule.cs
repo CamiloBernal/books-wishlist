@@ -1,4 +1,6 @@
-﻿namespace BooksWishlist.Presentation.Modules;
+﻿using BooksWishlist.Infrastructure.Store;
+
+namespace BooksWishlist.Presentation.Modules;
 
 public static class DiModule
 {
@@ -7,7 +9,9 @@ public static class DiModule
         //DI Containers
         services.AddSingleton<ILoggerService, LoggerService>()
             .AddScoped<ISecurityService, SecurityService>()
-            .AddScoped<IGoogleBooksService, GoogleBooksService>();
+            .AddScoped<IGoogleBooksService, GoogleBooksService>()
+            .AddScoped<IUserWishlistsRepository, UserWishlistsRepository>();
+
         return services;
     }
 }

@@ -14,7 +14,7 @@ public static class GoogleBooksServiceModule
     }
 
     private static void MapFullSearchEndpoint(IEndpointRouteBuilder routes) =>
-        routes.MapGet("/books/search/{q?}", async (HttpContext ctx, IGoogleBooksService booksService,
+        routes.MapGet("/books/search/{q?}", [Authorize] async (HttpContext ctx, IGoogleBooksService booksService,
                 ILoggerService log, [FromQuery] string? q, [FromQuery] int? page, [FromQuery] string? apiKey,
                 CancellationToken cancellationToken) =>
             {

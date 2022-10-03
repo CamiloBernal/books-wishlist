@@ -6,6 +6,7 @@ public static class ModelsValidationModule
     {
         services.AddScoped<IValidator<User>, UserValidator>();
         services.AddScoped<IValidator<TokenRequestDto>, TokenRequestDtoValidator>();
+        services.AddScoped<IValidator<WishlistDto>, WishlistDtoValidator>();
         return services;
     }
 }

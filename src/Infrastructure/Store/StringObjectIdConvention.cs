@@ -1,8 +1,4 @@
-﻿using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Conventions;
-using MongoDB.Bson.Serialization.IdGenerators;
-
-namespace BooksWishlist.Infrastructure.Databases;
+﻿namespace BooksWishlist.Infrastructure.Store;
 
 internal class StringObjectIdConvention : ConventionBase, IPostProcessingConvention
 {

@@ -34,7 +34,8 @@ app.MapGet("/health", async (HealthCheckService healthCheckService, Cancellation
 
 //Map Business EndPoints
 app.MapSecurityEndpoints()
-    .MapBooksServiceEndpoints();
+    .MapBooksServiceEndpoints()
+    .MapUserWishlistsEndpoints();
 
 
 app.UseWatchDogExceptionLogger()
