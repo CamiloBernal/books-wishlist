@@ -1,5 +1,3 @@
-using BooksWishlist.Infrastructure.Extensions;
-
 namespace BooksWishlist.Infrastructure.Services;
 
 public class SecurityService : ISecurityService
@@ -26,7 +24,7 @@ public class SecurityService : ISecurityService
         var userExists = await UserExists(user.UserName, cancellationToken);
         if (userExists)
         {
-            throw new DuplicateUserException($"The {user.UserName} user already exists in the database.");
+            throw new DuplicateEntityException($"The {user.UserName} user already exists in the database.");
         }
 
         user.Password = _crypto.EncryptString(user.Password);

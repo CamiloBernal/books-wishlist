@@ -1,4 +1,5 @@
-﻿using BooksWishlist.Application.UserWishlists.Entities;
+﻿using BooksWishlist.Application.Exceptions;
+using BooksWishlist.Application.UserWishlists.Entities;
 using BooksWishlist.Infrastructure.Databases;
 using BooksWishlist.Presentation.Extensions;
 
@@ -34,6 +35,17 @@ public static class UserWishlistsModule
                     userWishList.OwnerId = currentUser;
                     var createdList = await wishlistsRepository.Create(userWishList, cancellationToken);
                     return Results.Created("/wishlist", createdList);
+                }
+                catch (DuplicateEntityException duplicateUserException)
+                {
+                    log.LogError(duplicateUserException.Message, duplicateUserException);
+                    return Results.Conflict(new ProblemDetails
+                    {
+                        Type = Constants.ConflictResponseType,
+                        Title = "The wishlist is already taken",
+                        Status = 409,
+                        Detail = duplicateUserException.Message
+                    });
                 }
                 catch (Exception e)
                 {

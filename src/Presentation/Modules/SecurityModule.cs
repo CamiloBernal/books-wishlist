@@ -96,7 +96,7 @@ public static class SecurityModule
                         await securityService.RegisterUserAsync(user, cancellationToken);
                         return Results.Created("/sign-up", new { Name = user.UserName, user.Email });
                     }
-                    catch (DuplicateUserException duplicateUserException)
+                    catch (DuplicateEntityException duplicateUserException)
                     {
                         log.LogError(duplicateUserException.Message, duplicateUserException);
                         return Results.Conflict(new ProblemDetails
