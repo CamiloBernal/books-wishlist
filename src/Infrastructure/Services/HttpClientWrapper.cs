@@ -2,13 +2,14 @@
 
 namespace BooksWishlist.Infrastructure.Services;
 
-public class HttpClientWrapper<T> where T : class, new()
+public class HttpClientWrapper
 {
     private readonly ILoggerService _log;
 
     public HttpClientWrapper(ILoggerService log) => _log = log;
 
-    public async Task<T?> GetAsync(string resourceQuery, CancellationToken cancellationToken = default)
+    public async Task<T?> GetAsync<T>(string resourceQuery, CancellationToken cancellationToken = default)
+        where T : class, new()
     {
         try
         {
@@ -23,6 +24,12 @@ public class HttpClientWrapper<T> where T : class, new()
             if (httpRequestException.Message.ToLower().Contains("bad request"))
             {
                 throw new GoogleServiceBadRequestException();
+            }
+
+            if (httpRequestException.Message.ToLower().Contains("service unavailable)"))
+            {
+                //It is handled as a 404 since Google responds with an erroneous status for some requests.
+                return null;
             }
 
             throw;
