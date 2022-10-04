@@ -1,4 +1,6 @@
-﻿namespace BooksWishlist.Infrastructure.Store;
+﻿using BooksWishlist.Application.Books.Entities;
+
+namespace BooksWishlist.Infrastructure.Store;
 
 public interface IUserWishlistsRepository
 {
@@ -7,6 +9,9 @@ public interface IUserWishlistsRepository
     Task<IEnumerable<UserWishlists?>> FindByOwnerAsync(string owner, CancellationToken cancellationToken = default);
 
     Task<bool> DeleteAsync(string listName, string owner, CancellationToken cancellationToken = default);
+
+    Task<bool?> AddBooksAsync(string listName, IEnumerable<Book?>? books, string owner,
+        CancellationToken cancellationToken = default);
 
     Task<UserWishlists?> FindByNameAsync(string listName, string owner, CancellationToken cancellationToken = default);
 }

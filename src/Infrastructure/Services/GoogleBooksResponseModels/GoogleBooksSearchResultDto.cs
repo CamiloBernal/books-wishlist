@@ -12,7 +12,7 @@ public class GoogleBooksSearchResultDto
         var dto = new GoogleBooksSearchResultDto
         {
             TotalItems = results.TotalItems,
-            Books = results?.Items?.Select(i => new BookInfoDto
+            Books = results.Items?.Select(i => new BookInfoDto
             {
                 Id = i.Id,
                 SelfLink = i.SelfLink,

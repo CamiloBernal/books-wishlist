@@ -1,4 +1,8 @@
-﻿namespace BooksWishlist.Infrastructure.Store;
+﻿using BooksWishlist.Application.Books.Entities;
+
+// ReSharper disable PossibleMultipleEnumeration
+
+namespace BooksWishlist.Infrastructure.Store;
 
 public class UserWishlistsRepository : IUserWishlistsRepository
 {
@@ -34,6 +38,39 @@ public class UserWishlistsRepository : IUserWishlistsRepository
 
         await _unitOfWork.RemoveAsync(filterDefinition, cancellationToken);
         _log.LogWarning($"The Wishlist with name {listName} associated with the user {owner} and was deleted.");
+        return true;
+    }
+
+    public async Task<bool?> AddBooksAsync(string listName, IEnumerable<Book?>? books, string owner,
+        CancellationToken cancellationToken = default)
+    {
+        if (books is null)
+        {
+            return null;
+        }
+
+        var filterDefinition = GetFilterByNameAndOwner(listName, owner);
+        var foundList = await _unitOfWork.GetOneAsync(filterDefinition, cancellationToken);
+        if (foundList is null)
+        {
+            throw new WishListNotFoundException();
+        }
+
+        if (foundList.Books is not null && foundList.Books.Any())
+        {
+            var conflictedBooks = (from registeredBooks in foundList.Books
+                join newBooks in books on registeredBooks.BookId equals newBooks.BookId
+                select newBooks).ToList();
+            if (conflictedBooks.Any())
+                throw new DuplicatedBookInListException($"The book had already been added to the WishList {listName}");
+            foundList.Books = foundList.Books.Concat(books);
+        }
+        else
+        {
+            foundList.Books = books;
+        }
+
+        await _unitOfWork.UpdateAsync(filterDefinition, foundList, cancellationToken);
         return true;
     }
 

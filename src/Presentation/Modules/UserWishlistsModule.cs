@@ -1,8 +1,4 @@
-﻿using BooksWishlist.Application.Books.Entities;
-using BooksWishlist.Application.Exceptions;
-using BooksWishlist.Application.UserWishlists.Entities;
-using BooksWishlist.Infrastructure.Store;
-using BooksWishlist.Presentation.Extensions;
+﻿// ReSharper disable PossibleMultipleEnumeration
 
 namespace BooksWishlist.Presentation.Modules;
 
@@ -13,8 +9,83 @@ public static class UserWishlistsModule
         MapCreateWishListEndpoint(routes);
         MapListWishlistsEndpoint(routes);
         MapDeleteWishlistsEndpoint(routes);
+        MapAddBookToWishListEndpoint(routes);
         return routes;
     }
+
+
+    private static void MapAddBookToWishListEndpoint(IEndpointRouteBuilder routes) =>
+        routes.MapPut("/wishlists/{listName?}/books/", [Authorize] async (IUserWishlistsRepository wishlistsRepository,
+                IGoogleBooksService booksService,
+                ILoggerService log, HttpContext ctx, [FromRoute] string? listName,
+                [FromBody] IEnumerable<string>? booksList,
+                [FromQuery] string? apiKey,
+                CancellationToken cancellationToken) =>
+            {
+                if (apiKey is null)
+                {
+                    return Utils.BuildBadRequestResult("Query ApiKey not provided",
+                        "You must provide your query ApiKey for the Google Books service");
+                }
+
+                if (listName == null)
+                {
+                    return Utils.BuildBadRequestResult("Wishlist name not provided",
+                        "You must specify the name of the list that you want to delete. ex: /wishlists/{list_to_delete}");
+                }
+
+                if (booksList is null || !booksList.Any())
+                {
+                    return Utils.BuildBadRequestResult("Wishlist book list empty or not provided",
+                        "The list of books to add to your wishlist is empty or was not provided.");
+                }
+
+                try
+                {
+                    var currentUser = ctx.User.Identity?.Name;
+                    if (currentUser is null)
+                    {
+                        return Results.Unauthorized();
+                    }
+
+                    var uniqueBooks = booksList.ToHashSet();
+
+                    var validBooks =
+                        await ValidateAndBindBookIdListAsync(booksService, uniqueBooks, apiKey, cancellationToken)!;
+
+                    _ = await wishlistsRepository.AddBooksAsync(listName, validBooks, currentUser, cancellationToken);
+                    return Results.Accepted("/wishlists/{listName?}/books/", validBooks);
+                }
+                catch (InvalidBookReferenceException invalidBookReferenceException)
+                {
+                    log.LogError(invalidBookReferenceException.Message, invalidBookReferenceException);
+                    return Utils.BuildBadRequestResult("Invalid Book Reference", invalidBookReferenceException.Message);
+                }
+                catch (DuplicatedBookInListException duplicatedBookException)
+                {
+                    log.LogError(duplicatedBookException.Message, duplicatedBookException);
+                    return Results.Conflict(new ProblemDetails
+                    {
+                        Status = 409,
+                        Detail = duplicatedBookException.Message,
+                        Title = "Book duplicated in wishlist",
+                        Type = Constants.ConflictResponseType
+                    });
+                }
+                catch (Exception e)
+                {
+                    log.LogError(e.Message, e);
+                    return Results.Problem(e.Message, title: "Error creating the wishlist");
+                }
+            })
+            .WithName("/wishlists/put")
+            .WithTags("Business Endpoints")
+            .Produces(201)
+            .ProducesProblem(400)
+            .ProducesProblem(401)
+            .ProducesProblem(500)
+            .RequireAuthorization();
+
 
     private static void MapListWishlistsEndpoint(IEndpointRouteBuilder routes) =>
         routes.MapGet("/wishlists", [Authorize] async (HttpContext ctx, IUserWishlistsRepository wishlistsRepository,
@@ -71,12 +142,11 @@ public static class UserWishlistsModule
                 }
                 catch (WishListNotFoundException)
                 {
-                    return Results.NotFound(new
+                    return Results.NotFound(new ProblemDetails
                     {
-                        title = "Wishlist not found",
-                        details =
-                            "The specified Wishlist was not found in the database or is not associated with the current user",
-                        status = 404
+                        Title = "Wishlist not found",
+                        Detail = "The specified Wishlist was not found in the database or is not associated with the current user",
+                        Status = 404
                     });
                 }
                 catch (Exception e)
