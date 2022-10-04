@@ -1,4 +1,5 @@
 ﻿using BooksWishlist.Application.Books.Entities;
+using BooksWishlist.Application.Extensions;
 
 // ReSharper disable PossibleMultipleEnumeration
 
@@ -25,6 +26,21 @@ public class UserWishlistsRepository : IUserWishlistsRepository
 
         await _unitOfWork.CreateAsync(list, cancellationToken);
         return list;
+    }
+
+    public async Task<UserWishlists> UpdateAsync(UserWishlists list, string listName, string owner,
+        CancellationToken cancellationToken = default)
+    {
+        var filterDefinition = GetFilterByNameAndOwner(listName, owner);
+        var foundList = await _unitOfWork.GetOneAsync(filterDefinition, cancellationToken);
+        if (foundList is null)
+        {
+            throw new WishListNotFoundException();
+        }
+
+        foundList.Merge(list);
+        await _unitOfWork.UpdateAsync(filterDefinition, list, cancellationToken);
+        return foundList;
     }
 
     public async Task<bool> DeleteAsync(string listName, string owner, CancellationToken cancellationToken = default)
@@ -62,7 +78,10 @@ public class UserWishlistsRepository : IUserWishlistsRepository
                 join newBooks in books on registeredBooks.BookId equals newBooks.BookId
                 select newBooks).ToList();
             if (conflictedBooks.Any())
+            {
                 throw new DuplicatedBookInListException($"The book had already been added to the WishList {listName}");
+            }
+
             foundList.Books = foundList.Books.Concat(books);
         }
         else
