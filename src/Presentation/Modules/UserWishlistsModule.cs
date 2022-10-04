@@ -12,8 +12,49 @@ public static class UserWishlistsModule
         MapAddBookToWishListEndpoint(routes);
         MapEditWishListEndpoint(routes);
         MapRemoveBookToWishListEndpoint(routes);
+        MapListWishlistsBooksEndpoint(routes);
         return routes;
     }
+
+
+    private static void MapListWishlistsBooksEndpoint(IEndpointRouteBuilder routes) =>
+        routes.MapGet("/wishlists/{listName?}/books", [Authorize] async (HttpContext ctx,
+                IUserWishlistsRepository wishlistsRepository,
+                ILoggerService log,
+                [FromRoute] string? listName,
+                CancellationToken cancellationToken) =>
+            {
+                if (listName == null)
+                {
+                    return Utils.BuildBadRequestResult("Wishlist name not provided",
+                        "You must specify the name of the list that you want to list.");
+                }
+
+                var currentUser = ctx.User.Identity?.Name;
+                if (currentUser is null)
+                {
+                    return Results.Unauthorized();
+                }
+
+                try
+                {
+                    var booksInList = await wishlistsRepository.GetListBooks(listName, currentUser, cancellationToken);
+                    return Results.Ok(booksInList);
+                }
+                catch (Exception e)
+                {
+                    log.LogError(e.Message, e);
+                    return Results.Problem(e.Message, title: "Error creating the wishlist");
+                }
+            })
+            .WithName("wishlists/books/get")
+            .WithTags("Business Endpoints")
+            .Produces<IEnumerable<Book>>()
+            .ProducesProblem(400)
+            .ProducesProblem(401)
+            .ProducesProblem(500)
+            .RequireAuthorization();
+
 
     private static void MapRemoveBookToWishListEndpoint(IEndpointRouteBuilder routes) =>
         routes.MapDelete("/wishlists/{listName?}/books/{bookId?}", [Authorize] async (

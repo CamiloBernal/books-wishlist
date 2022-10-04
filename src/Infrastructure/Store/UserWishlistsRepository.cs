@@ -114,6 +114,19 @@ public class UserWishlistsRepository : IUserWishlistsRepository
         return true;
     }
 
+    public async Task<IEnumerable<Book?>?> GetListBooks(string listName, string owner,
+        CancellationToken cancellationToken = default)
+    {
+        var filterDefinition = GetFilterByNameAndOwner(listName, owner);
+        var foundList = await _unitOfWork.GetOneAsync(filterDefinition, cancellationToken);
+        if (foundList is null)
+        {
+            throw new WishListNotFoundException();
+        }
+
+        return foundList.Books;
+    }
+
     public Task<UserWishlists?> FindByNameAsync(string listName, string owner,
         CancellationToken cancellationToken = default) =>
         throw new NotImplementedException();

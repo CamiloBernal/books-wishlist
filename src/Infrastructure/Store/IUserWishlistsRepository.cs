@@ -19,5 +19,9 @@ public interface IUserWishlistsRepository
     Task<bool?> RemoveBooksAsync(string listName, string bookId, string owner,
         CancellationToken cancellationToken = default);
 
+
+    Task<IEnumerable<Book?>?> GetListBooks(string listName, string owner,
+        CancellationToken cancellationToken = default);
+
     Task<UserWishlists?> FindByNameAsync(string listName, string owner, CancellationToken cancellationToken = default);
 }
