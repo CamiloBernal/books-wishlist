@@ -43,7 +43,8 @@ public class BooksWishlistUnitOfWork<T> where T : class, new()
         }
     }
 
-    public async Task<IEnumerable<T?>> GetAsync(FilterDefinition<T> filterDefinition, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<T?>> GetAsync(FilterDefinition<T> filterDefinition,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -56,7 +57,8 @@ public class BooksWishlistUnitOfWork<T> where T : class, new()
         }
     }
 
-    public async Task<T?> GetOneAsync(FilterDefinition<T> filterDefinition, CancellationToken cancellationToken = default)
+    public async Task<T?> GetOneAsync(FilterDefinition<T> filterDefinition,
+        CancellationToken cancellationToken = default)
     {
         try
         {
