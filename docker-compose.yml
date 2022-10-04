@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  wishlist-store:
+    image: mongo:latest
+
+  wishlist-presentation:
+    image: ${DOCKER_REGISTRY-}books-wishlist-api
+    build:
+      context: .
+      dockerfile: Dockerfile
