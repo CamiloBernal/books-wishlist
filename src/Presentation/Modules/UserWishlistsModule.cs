@@ -11,8 +11,81 @@ public static class UserWishlistsModule
         MapDeleteWishlistsEndpoint(routes);
         MapAddBookToWishListEndpoint(routes);
         MapEditWishListEndpoint(routes);
+        MapRemoveBookToWishListEndpoint(routes);
         return routes;
     }
+
+    private static void MapRemoveBookToWishListEndpoint(IEndpointRouteBuilder routes) =>
+        routes.MapDelete("/wishlists/{listName?}/books/{bookId?}", [Authorize] async (
+                IUserWishlistsRepository wishlistsRepository,
+                IGoogleBooksService booksService,
+                ILoggerService log, HttpContext ctx, [FromRoute] string? listName,
+                [FromRoute] string? bookId,
+                CancellationToken cancellationToken) =>
+            {
+                if (bookId is null)
+                {
+                    return Utils.BuildBadRequestResult("Book Id for remove not provided",
+                        "You must send the id of the book to remove from the list");
+                }
+
+                if (listName == null)
+                {
+                    return Utils.BuildBadRequestResult("Wishlist name not provided",
+                        "You must specify the name of the list that you want to delete.");
+                }
+
+                try
+                {
+                    var currentUser = ctx.User.Identity?.Name;
+                    if (currentUser is null)
+                    {
+                        return Results.Unauthorized();
+                    }
+
+                    _ = await wishlistsRepository.RemoveBooksAsync(listName, bookId, currentUser, cancellationToken);
+                    return Results.NoContent();
+                }
+                catch (InvalidBookReferenceException invalidBookReferenceException)
+                {
+                    log.LogError(invalidBookReferenceException.Message, invalidBookReferenceException);
+                    return Utils.BuildBadRequestResult("Invalid Book Reference", invalidBookReferenceException.Message);
+                }
+                catch (WishListNotFoundException notFoundException)
+                {
+                    log.LogError(notFoundException, notFoundException.Message);
+                    return Results.NotFound(new ProblemDetails
+                    {
+                        Title = "Wishlist not found",
+                        Detail =
+                            "The specified Wishlist was not found in the database or is not associated with the current user",
+                        Status = 404
+                    });
+                }
+                catch (DuplicatedBookInListException duplicatedBookException)
+                {
+                    log.LogError(duplicatedBookException.Message, duplicatedBookException);
+                    return Results.Conflict(new ProblemDetails
+                    {
+                        Status = 409,
+                        Detail = duplicatedBookException.Message,
+                        Title = "Book duplicated in wishlist",
+                        Type = Constants.ConflictResponseType
+                    });
+                }
+                catch (Exception e)
+                {
+                    log.LogError(e.Message, e);
+                    return Results.Problem(e.Message, title: "Error creating the wishlist");
+                }
+            })
+            .WithName("/wishlists/books/delete")
+            .WithTags("Business Endpoints")
+            .Produces(204)
+            .ProducesProblem(400)
+            .ProducesProblem(401)
+            .ProducesProblem(500)
+            .RequireAuthorization();
 
 
     private static void MapAddBookToWishListEndpoint(IEndpointRouteBuilder routes) =>
@@ -318,7 +391,7 @@ public static class UserWishlistsModule
             })
             .WithName("/wishlists/put")
             .WithTags("Business Endpoints")
-            .Produces(201)
+            .Produces<UserWishlists>(202)
             .ProducesProblem(400)
             .ProducesProblem(409)
             .ProducesProblem(401)

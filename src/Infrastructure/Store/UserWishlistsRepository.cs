@@ -93,6 +93,27 @@ public class UserWishlistsRepository : IUserWishlistsRepository
         return true;
     }
 
+    public async Task<bool?> RemoveBooksAsync(string listName, string bookId, string owner,
+        CancellationToken cancellationToken = default)
+    {
+        var filterDefinition = GetFilterByNameAndOwner(listName, owner);
+        var foundList = await _unitOfWork.GetOneAsync(filterDefinition, cancellationToken);
+        if (foundList is null)
+        {
+            throw new WishListNotFoundException();
+        }
+
+        var foundBook = foundList.Books?.FirstOrDefault(b => b?.BookId == bookId);
+        if (foundBook is null)
+        {
+            throw new BookNotFoundInListException();
+        }
+
+        foundList.Books = foundList?.Books?.Where(b => b?.BookId != bookId);
+        await _unitOfWork.UpdateAsync(filterDefinition, foundList, cancellationToken);
+        return true;
+    }
+
     public Task<UserWishlists?> FindByNameAsync(string listName, string owner,
         CancellationToken cancellationToken = default) =>
         throw new NotImplementedException();
