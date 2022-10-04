@@ -8,6 +8,7 @@
     <Nullable>enable</Nullable>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <LangVersion>latest</LangVersion>
+    <AssemblyName>BooksWishlist.$(MSBuildProjectName)</AssemblyName>
   </PropertyGroup>
 
 </Project>

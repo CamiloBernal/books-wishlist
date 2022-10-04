@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  wishlist-store:
+    container_name: wishlist-store
+    restart: always
+    volumes:
+      - wishlist-data:/data/db
+    ports:
+      - "27017:27017"
+
+  wishlist-presentation:
+    container_name: wishlist-presentation
+    environment:
+      - ASPNETCORE_ENVIRONMENT
+      - "StoreDatabase:ConnectionString=mongodb://wishlist-store:27017"
+    depends_on:
+      - wishlist-store
+    ports:
+      - "8080:80"
+
+volumes:
+  wishlist-data:
+
