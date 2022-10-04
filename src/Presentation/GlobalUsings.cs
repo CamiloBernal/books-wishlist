@@ -1,14 +1,5 @@
 ﻿//Business Usings:
 
-global using System.Reflection;
-global using System.Runtime.CompilerServices;
-global using System.Runtime.Serialization;
-global using BooksWishlist.Presentation.Modules;
-
-// Global using directives
-global using System.Text;
-global using System.Text.RegularExpressions;
-global using Asp.Versioning;
 global using BooksWishlist.Application.Common;
 global using BooksWishlist.Application.Users.Entities;
 global using BooksWishlist.Infrastructure.Services;
@@ -17,8 +8,15 @@ global using BooksWishlist.Presentation.CodeBase;
 global using BooksWishlist.Presentation.Configuration;
 global using BooksWishlist.Presentation.Services;
 global using BooksWishlist.Presentation.ViewModels;
+global using BooksWishlist.Presentation.Modules;
+
+// Global using directives
+global using System.Reflection;
+global using System.Runtime.CompilerServices;
+global using System.Text;
+global using System.Text.RegularExpressions;
+global using Asp.Versioning;
 global using FluentValidation;
-global using FluentValidation.Results;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;

@@ -49,7 +49,11 @@ app.UseWatchDogExceptionLogger()
     })
     .UseHttpsRedirection()
     .UseSwagger()
-    .UseSwaggerUI();
+    .UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        c.RoutePrefix = string.Empty;
+    });
 
 //Run The App
 WatchLogger.Log("...Starting Host...");

@@ -16,7 +16,9 @@ public static class OpenApiModule
                     Version = "v1",
                     Contact = new OpenApiContact
                     {
-                        Name = "Camilo Bernal", Url = new Uri("https://www.camilobernal.dev")
+                        Name = "Camilo Bernal",
+                        Url = new Uri("https://www.camilobernal.dev"),
+                        Email = "me@camilobernal.dev"
                     }
                 });
             setup.SchemaFilter<OpenApiSchemaFilter>();

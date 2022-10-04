@@ -12,32 +12,32 @@ public static class UserWishlistsModule
     {
         MapCreateWishListEndpoint(routes);
         MapListWishlistsEndpoint(routes);
+        MapDeleteWishlistsEndpoint(routes);
         return routes;
     }
 
-    private static void MapListWishlistsEndpoint(IEndpointRouteBuilder routes)
-    {
-        routes.MapGet("/wishlists", [Authorize]
-                async (HttpContext ctx, IUserWishlistsRepository wishlistsRepository, ILoggerService log,
-                    CancellationToken cancellationToken) =>
+    private static void MapListWishlistsEndpoint(IEndpointRouteBuilder routes) =>
+        routes.MapGet("/wishlists", [Authorize] async (HttpContext ctx, IUserWishlistsRepository wishlistsRepository,
+                ILoggerService log,
+                CancellationToken cancellationToken) =>
+            {
+                var currentUser = ctx.User.Identity?.Name;
+                if (currentUser is null)
                 {
-                    var currentUser = ctx.User.Identity?.Name;
-                    if (currentUser is null)
-                    {
-                        return Results.Unauthorized();
-                    }
+                    return Results.Unauthorized();
+                }
 
-                    try
-                    {
-                        var userLists = await wishlistsRepository.FindByOwnerAsync(currentUser, cancellationToken);
-                        return Results.Ok(userLists);
-                    }
-                    catch (Exception e)
-                    {
-                        log.LogError(e.Message, e);
-                        return Results.Problem(e.Message, title: "Error creating the wishlist");
-                    }
-                })
+                try
+                {
+                    var userLists = await wishlistsRepository.FindByOwnerAsync(currentUser, cancellationToken);
+                    return Results.Ok(userLists);
+                }
+                catch (Exception e)
+                {
+                    log.LogError(e.Message, e);
+                    return Results.Problem(e.Message, title: "Error creating the wishlist");
+                }
+            })
             .WithName("wishlists")
             .WithTags("Business Endpoints")
             .Produces<IEnumerable<UserWishlists>>()
@@ -45,7 +45,55 @@ public static class UserWishlistsModule
             .ProducesProblem(401)
             .ProducesProblem(500)
             .RequireAuthorization();
-    }
+
+
+    private static void MapDeleteWishlistsEndpoint(IEndpointRouteBuilder routes) =>
+        routes.MapDelete("/wishlists/{listName?}", [Authorize] async (HttpContext ctx,
+                IUserWishlistsRepository wishlistsRepository, ILoggerService log, [FromRoute] string? listName,
+                CancellationToken cancellationToken) =>
+            {
+                if (listName == null)
+                {
+                    return Utils.BuildBadRequestResult("Wishlist name not provided",
+                        "You must specify the name of the list that you want to delete. ex: /wishlists/{list_to_delete}");
+                }
+
+                var currentUser = ctx.User.Identity?.Name;
+                if (currentUser is null)
+                {
+                    return Results.Unauthorized();
+                }
+
+                try
+                {
+                    _ = await wishlistsRepository.DeleteAsync(listName, currentUser, cancellationToken);
+                    return Results.NoContent();
+                }
+                catch (WishListNotFoundException)
+                {
+                    return Results.NotFound(new
+                    {
+                        title = "Wishlist not found",
+                        details =
+                            "The specified Wishlist was not found in the database or is not associated with the current user",
+                        status = 404
+                    });
+                }
+                catch (Exception e)
+                {
+                    log.LogError(e.Message, e);
+                    return Results.Problem(e.Message, title: "Error creating the wishlist");
+                }
+            })
+            .WithName("wishlists/delete")
+            .WithTags("Business Endpoints")
+            .Produces(204)
+            .ProducesProblem(400)
+            .ProducesProblem(401)
+            .ProducesProblem(404)
+            .ProducesProblem(500)
+            .RequireAuthorization();
+
 
     private static void MapCreateWishListEndpoint(IEndpointRouteBuilder routes) =>
         routes.MapPost("/wishlists", [Authorize] async (IUserWishlistsRepository wishlistsRepository,
@@ -82,7 +130,7 @@ public static class UserWishlistsModule
                     var validBooks =
                         await ValidateAndBindBookIdListAsync(booksService, wishlist.Books, apiKey, cancellationToken)!;
                     userWishList.Books = validBooks;
-                    var createdList = await wishlistsRepository.Create(userWishList, cancellationToken);
+                    var createdList = await wishlistsRepository.CreateAsync(userWishList, cancellationToken);
                     return Results.Created("/wishlist", createdList);
                 }
                 catch (DuplicateEntityException duplicateUserException)

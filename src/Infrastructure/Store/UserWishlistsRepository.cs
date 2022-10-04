@@ -2,8 +2,8 @@
 
 public class UserWishlistsRepository : IUserWishlistsRepository
 {
+    private readonly ILoggerService _log;
     private readonly BooksWishlistUnitOfWork<UserWishlists> _unitOfWork;
-    private ILoggerService _log;
 
     public UserWishlistsRepository(ILoggerService log, IOptions<StoreDatabaseSettings> storeSettings)
     {
@@ -11,7 +11,7 @@ public class UserWishlistsRepository : IUserWishlistsRepository
         _log = log;
     }
 
-    public async Task<UserWishlists> Create(UserWishlists list, CancellationToken cancellationToken = default)
+    public async Task<UserWishlists> CreateAsync(UserWishlists list, CancellationToken cancellationToken = default)
     {
         var listExists = await WishListExists(list.Name, list.OwnerId, cancellationToken);
         if (listExists)
@@ -23,29 +23,48 @@ public class UserWishlistsRepository : IUserWishlistsRepository
         return list;
     }
 
-    public async Task<UserWishlists?> FindByName(string name, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(string listName, string owner, CancellationToken cancellationToken = default)
     {
-        var filterDefinition = GetFilterByListName(name);
-        return await _unitOfWork.GetOneAsync(filterDefinition, cancellationToken);
+        var filterDefinition = GetFilterByNameAndOwner(listName, owner);
+        var foundList = await _unitOfWork.GetOneAsync(filterDefinition, cancellationToken);
+        if (foundList is null)
+        {
+            throw new WishListNotFoundException();
+        }
+
+        await _unitOfWork.RemoveAsync(filterDefinition, cancellationToken);
+        _log.LogWarning($"The Wishlist with name {listName} associated with the user {owner} and was deleted.");
+        return true;
     }
 
+    public Task<UserWishlists?> FindByNameAsync(string listName, string owner,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
 
-    public async Task<IEnumerable<UserWishlists?>> FindByOwnerAsync(string owner, CancellationToken cancellationToken = default)
+
+    public async Task<IEnumerable<UserWishlists?>> FindByOwnerAsync(string owner,
+        CancellationToken cancellationToken = default)
     {
         var filterDefinition = new FilterDefinitionBuilder<UserWishlists>().Eq(l => l.OwnerId, owner);
-        return  await _unitOfWork.GetAsync(filterDefinition, cancellationToken);
+        return await _unitOfWork.GetAsync(filterDefinition, cancellationToken);
     }
 
     private static FilterDefinition<UserWishlists> GetFilterByListName(string name) =>
         Builders<UserWishlists>.Filter.EqCase(list => list.Name, name, true);
 
-
-    private async Task<bool> WishListExists(string listName, string owner,
-        CancellationToken cancellationToken = default)
+    private static FilterDefinition<UserWishlists> GetFilterByNameAndOwner(string listName, string owner)
     {
         var filterByName = GetFilterByListName(listName);
         var filterDefinition = new FilterDefinitionBuilder<UserWishlists>().And(filterByName,
             new FilterDefinitionBuilder<UserWishlists>().Eq(l => l.OwnerId, owner));
+        return filterDefinition;
+    }
+
+
+    private async Task<bool> WishListExists(string listName, string owner,
+        CancellationToken cancellationToken = default)
+    {
+        var filterDefinition = GetFilterByNameAndOwner(listName, owner);
         var count = await _unitOfWork.CountAsync(filterDefinition, cancellationToken);
         return count > 0;
     }
