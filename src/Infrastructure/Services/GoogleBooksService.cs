@@ -52,7 +52,7 @@ public class GoogleBooksService : IGoogleBooksService
         return foundBooks;
     }
 
-    public BookSearchType ParseSearchType(string value) => value.ToLower() switch
+    public BookSearchType ParseSearchType(string? value) => value?.ToLower() switch
     {
         "title" => BookSearchType.InTitle,
         "author" => BookSearchType.InAuthor,
@@ -65,7 +65,7 @@ public class GoogleBooksService : IGoogleBooksService
     };
 
 
-    public async Task<Book?> ValidateAndBindBook(string bookId, string apiKey,
+    private async Task<Book?> ValidateAndBindBook(string bookId, string apiKey,
         CancellationToken cancellationToken = default)
     {
         var query = $"{Constants.GoogleBooksServiceVolumesBase}{bookId}?key={apiKey}";

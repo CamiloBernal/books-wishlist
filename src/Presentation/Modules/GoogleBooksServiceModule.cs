@@ -1,5 +1,4 @@
-﻿using BooksWishlist.Application.Exceptions;
-using BooksWishlist.Infrastructure.CodeBase;
+﻿using BooksWishlist.Infrastructure.CodeBase;
 using BooksWishlist.Infrastructure.Services.GoogleBooksResponseModels;
 
 namespace BooksWishlist.Presentation.Modules;

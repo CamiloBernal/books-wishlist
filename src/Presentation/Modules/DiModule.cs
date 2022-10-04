@@ -1,6 +1,4 @@
-﻿using BooksWishlist.Infrastructure.Store;
-
-namespace BooksWishlist.Presentation.Modules;
+﻿namespace BooksWishlist.Presentation.Modules;
 
 public static class DiModule
 {

@@ -1,4 +1,5 @@
 ﻿// ReSharper disable ExplicitCallerInfoArgument
+// ReSharper disable TemplateIsNotCompileTimeConstantProblem
 
 namespace BooksWishlist.Presentation.Services;
 

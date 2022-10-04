@@ -1,7 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using BooksWishlist.Application.Exceptions;
-using BooksWishlist.Presentation.Extensions;
 using BooksWishlist.Presentation.Models;
 using Microsoft.Extensions.Options;
 

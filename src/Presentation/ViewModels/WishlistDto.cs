@@ -1,6 +1,4 @@
-﻿using BooksWishlist.Application.UserWishlists.Entities;
-
-namespace BooksWishlist.Presentation.ViewModels;
+﻿namespace BooksWishlist.Presentation.ViewModels;
 
 public class WishlistDto
 {
