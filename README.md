@@ -107,5 +107,3 @@ Additionally, all the queries allow paging and require that the Google APIKey be
 ---
 _Thank MELI for taking the time to review this technical test. I really enjoyed developing it (I hope it shows) and I hope it lives up to your expectations._
 
-![Merge status](https://img.shields.io/github/commit-status/camilobernal/books-wishlist/master/74d98bbdaa52e15b5c007b266cc0dc9fdaa6e07f)
-
