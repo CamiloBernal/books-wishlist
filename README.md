@@ -1,6 +1,7 @@
 # **Books Wishlist REST API**
 
-## **A Meli Technical Assessment By Camilo Bernal**
+## **A Meli Technical Assessment**
+### **By Camilo Bernal**
 
 Below, the exercise carried out as part of the technical assessment for Meli is briefly described.
 
@@ -23,7 +24,7 @@ The following was the technological stack with which the application was develop
 1. Programming language: C# 10
 2. Database: MongoDB
 3. Development framework: .Net 6
-4. Below: Docker/ Docker compose
+4. Infra: Docker/ Docker compose
 
 To consider, 2 additional tools were included in the development for:
 
