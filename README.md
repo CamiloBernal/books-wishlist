@@ -104,6 +104,11 @@ In this case, the type of search must be specified in the url including the sear
 
 Additionally, all the queries allow paging and require that the Google APIKey be passed as a parameter in the url (as requested by the test).
 
+## **Repository Overview**
+1. All changes are currently synced to both the main and develop branches, so you could use either.
+2. Enabled Dependabot (https://github.com/dependabot) to identify project dependencies.
+![dependabot](https://resources.camilobernal.dev/images/meli_dependabot.png)
+
 ---
 _Thank MELI for taking the time to review this technical test. I really enjoyed developing it (I hope it shows) and I hope it lives up to your expectations._
 
